@@ -1,38 +1,38 @@
-# main.py
+import os
 from fastapi import FastAPI
 from langchain_ollama import ChatOllama
-from langchain.agents import AgentExecutor, create_tool_calling_agent
-from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
-from mcp_server import mcp
+from langchain.agents import create_agent
+from langchain_core.messages import HumanMessage
+from langchain_mcp_adapters.client import MultiServerMCPClient
 
 app = FastAPI()
 
-# 1. Setup Local LLM (Ollama)
-# Note: Ensure Ollama is running on your machine (default port 11434)
-llm = ChatOllama(
-    model="llama3.1",
-    temperature=0,
-    format="json"  # Forces structured output which helps with tool calling
-)
+llm = ChatOllama(model="llama3.1", temperature=0.2)
 
-# 2. Extract Tools from MCP Server
-tools = mcp.get_tools()
+current_dir = os.path.dirname(os.path.abspath(__file__))
+server_path = os.path.join(current_dir, "mcp_server.py")
 
-# 3. Define the Prompt
-prompt = ChatPromptTemplate.from_messages([
-    ("system", "You are a local University Assistant. Use your database tools to help students."),
-    MessagesPlaceholder(variable_name="chat_history"),
-    ("human", "{input}"),
-    MessagesPlaceholder(variable_name="agent_scratchpad"),
-])
+async def get_mcp_tools():
+    client = MultiServerMCPClient({
+        "db_server": {
+            "transport": "stdio",
+            "command": "python", 
+            "args": [server_path]
+        }
+    })
+    return await client.get_tools()
 
-# 4. Initialize the Agent
-# Llama 3.1+ works best with the 'tool_calling_agent'
-agent = create_tool_calling_agent(llm, tools, prompt)
-agent_executor = AgentExecutor(agent=agent, tools=tools, verbose=True)
+system_prompt = "You are a Task Management Assistant. Use tools to query the DB."
 
 @app.post("/ask")
 async def ask_chatbot(query: str):
-    # Process query through the local agent
-    response = await agent_executor.ainvoke({"input": query, "chat_history": []})
-    return {"answer": response["output"]}
+    tools = await get_mcp_tools()
+    
+    agent = create_agent(
+        model=llm,
+        tools=tools,
+        system_prompt=system_prompt
+    )
+    
+    result = await agent.ainvoke({"messages": [HumanMessage(content=query)]})
+    return {"answer": result["messages"][-1].content}

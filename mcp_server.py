@@ -29,3 +29,6 @@ async def get_policy_by_category(category: str) -> str:
         if not policies:
             return f"No policies found in category: {category}"
         return "\n".join([f"Title: {p.title}\nDesc: {p.description}" for p in policies])
+    
+if __name__ == "__main__":
+    mcp.run(transport="stdio",show_banner=False)
