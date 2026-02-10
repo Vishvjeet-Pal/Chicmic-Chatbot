@@ -64,18 +64,11 @@ def search_faq(keyword: str) -> str:
 def get_policy_by_category(category: str) -> str:
     """Retrieve policies by category."""
     session = SessionLocal()
-    try:
-        query = select(Policy).where(Policy.category == category)
-        result = session.execute(query)
-        policies = result.scalars().all()
+    
+    query = select(Policy).where(Policy.category == category)
+    result = session.execute(query)
+    policies = result.scalars().all()
 
-        if not policies:
-            return f"No policies found in category: {category}"
-
-        return "\n".join([
-            f"Title: {p.title}\nDesc: {p.description}"
-            for p in policies
-        ])
-
-    finally:
-        session.close()
+    if not policies:
+        return f"No policies found in category: {category}"
+    return "\n".join([f"Title: {p.title}\nDesc: {p.description}" for p in policies])
