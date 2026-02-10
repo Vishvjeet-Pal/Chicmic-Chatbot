@@ -33,42 +33,43 @@
 
 
 # mcp_server.py
-from fastmcp import FastMCP
-from sqlalchemy import select
-from database import SessionLocal
-from models.faq import FAQ
-from models.policy import Policy
-
+from mcp.server.fastmcp import FastMCP
+from langchain_ollama import OllamaEmbeddings
+from langchain_chroma import Chroma
+import os
+from vector_data import vector_store
 mcp = FastMCP("Company Assistant")
 
+# 1. Initialize Ollama Embeddings
+# This must match the model you used to index the data
+embeddings = OllamaEmbeddings(model="llama3.1")
 
 @mcp.tool()
-def search_faq(keyword: str) -> str:
-    """Search for frequently asked questions by a keyword."""
-    session = SessionLocal()
-    try:
-        query = select(FAQ).where(FAQ.question.contains(keyword))
-        result = session.execute(query)
-        faqs = result.scalars().all()
-
-        if not faqs:
-            return "No matching FAQs found."
-
-        return "\n".join([f"Q: {f.question} | A: {f.answer}" for f in faqs])
-
-    finally:
-        session.close()
-
-
-@mcp.tool()
-def get_policy_by_category(category: str) -> str:
-    """Retrieve policies by category."""
-    session = SessionLocal()
+async def search_faq(query: str) -> str:
+    """Find answers to FAQs using semantic similarity search."""
+    # Perform similarity search instead of SQL WHERE
+    docs = vector_store.similarity_search(query, k=3, filter={"type": "faq"})
     
-    query = select(Policy).where(Policy.category == category)
-    result = session.execute(query)
-    policies = result.scalars().all()
+    if not docs:
+        return "No relevant FAQ found for your query."
+    
+    results = []
+    for doc in docs:
+        results.append(f"Q: {doc.metadata.get('question')}\nA: {doc.page_content}")
+    
+    return "\n---\n".join(results)
 
-    if not policies:
-        return f"No policies found in category: {category}"
-    return "\n".join([f"Title: {p.title}\nDesc: {p.description}" for p in policies])
+
+
+@mcp.tool()
+async def get_policy_by_semantic_match(query: str) -> str:
+    """Find university policies based on the meaning of your query."""
+    docs = vector_store.similarity_search(query, k=2, filter={"type": "policy"})
+    
+    if not docs:
+        return "No matching policies found."
+    
+    return "\n\n".join([f"Policy: {d.metadata.get('title')}\nDetails: {d.page_content}" for d in docs])
+
+if __name__ == "__main__":
+    mcp.run(transport="stdio")
