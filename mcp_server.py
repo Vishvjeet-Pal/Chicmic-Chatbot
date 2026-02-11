@@ -91,55 +91,77 @@ embeddings = OllamaEmbeddings(model="nomic-embed-text")
 
 
 
-@mcp.tool()
-async def get_policy_by_semantic_match(query: str) -> str:
-    """Return company policies such as employee leave policy, sick leave, maternity leave, etc."""
+# @mcp.tool()
+# async def get_policy_by_semantic_match(query: str) -> str:
+#     """Return company policies such as employee leave policy, sick leave, maternity leave, etc."""
 
-    cache_key = f"policy:{query}"
+#     cache_key = f"policy:{query}"
 
-    async def search():
-        docs = vector_store.similarity_search(query, k=4, filter={"type": "policy"})
-        if not docs:
-            return "No matching policies found."
-        return "\n\n".join(
-            [f"Policy: {d.metadata.get('title')}\nDetails: {d.page_content}" for d in docs]
-        )
+#     async def search():
+#         docs = vector_store.similarity_search(query, k=4, filter={"type": "policy"})
+#         if not docs:
+#             return "No matching policies found."
+#         return "\n\n".join(
+#             [f"Policy: {d.metadata.get('title')}\nDetails: {d.page_content}" for d in docs]
+#         )
 
-    return await get_cached_or_search(cache_key, search)
+#     return await get_cached_or_search(cache_key, search)
 
 
-@mcp.tool()
-async def login_credentials(query: str) -> str:
-    """Provide login support for various company platforms.
-    Answer queries such as:
-    - "How can i reset my password?" or "What if I forget my ERP password?" 
-    """
-    cache_key = f"login:{query}"
+# @mcp.tool()
+# async def login_credentials(query: str) -> str:
+#     """Provide login support for various company platforms.
+#     Answer queries such as:
+#     - "How can i reset my password?" or "What if I forget my ERP password?" 
+#     """
+#     cache_key = f"login:{query}"
 
-    async def search():
-        docs = vector_store.similarity_search(query, k=4, filter={"type": "login"})
-        if not docs:
-            return "No relevant credentials found for your query."
+#     async def search():
+#         docs = vector_store.similarity_search(query, k=4, filter={"type": "login"})
+#         if not docs:
+#             return "No relevant credentials found for your query."
 
-        return "\n\n".join(
-            [f"Question: {d.metadata.get('question')}\nAnswer: {d.page_content}" for d in docs]
-        )
+#         return "\n\n".join(
+#             [f"Question: {d.metadata.get('question')}\nAnswer: {d.page_content}" for d in docs]
+#         )
 
-    return await get_cached_or_search(cache_key, search)
+#     return await get_cached_or_search(cache_key, search)
 
-@mcp.tool()
-async def personal_info(query: str) -> str:
-    """Provide personal information of employees related to the ERP system such as how to access and edit personal details."""
-    cache_key=f"personal_info:{query}"
+# @mcp.tool()
+# async def personal_info(query: str) -> str:
+#     """Provide personal information of employees related to the ERP system such as how to access and edit personal details."""
+#     cache_key=f"personal_info:{query}"
 
-    async def search():
-        docs = vector_store.similarity_search(query, k=3, filter={"type": "personal_info"})
+#     async def search():
+#         docs = vector_store.similarity_search(query, k=3, filter={"type": "personal_info"})
 
-        if not docs:
-            return "No relevant credentials found for your query."
+#         if not docs:
+#             return "No relevant credentials found for your query."
     
-        return "\n\n".join([f"Question: {d.metadata.get('question')}\nAnswer: {d.page_content}" for d in docs])
-    return await get_cached_or_search(cache_key, search)
+#         return "\n\n".join([f"Question: {d.metadata.get('question')}\nAnswer: {d.page_content}" for d in docs])
+#     return await get_cached_or_search(cache_key, search)
    
+@mcp.tool()
+async def search_pdf_policy(query: str) -> str:
+    """Search information from uploaded company policy PDF documents.
+    Provide information about company policies such as leave policy, sick leave, maternity leave, etc. based on the content of the uploaded PDF documents."""
+
+    cache_key = f"pdf_policy:{query}"
+
+    async def search():
+        docs = vector_store.similarity_search(
+            query,
+            k=2,
+            filter={"type": "policy_pdf"}
+        )
+        print(docs)
+        if not docs:
+            return "No relevant information found in PDF."
+
+        return "\n\n".join([d.page_content for d in docs])
+
+    return await get_cached_or_search(cache_key, search)
+
+
 if __name__ == "__main__":
     mcp.run(transport="stdio")
