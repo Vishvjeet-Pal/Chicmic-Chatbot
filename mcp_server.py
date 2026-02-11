@@ -38,12 +38,38 @@ from langchain_ollama import OllamaEmbeddings
 from langchain_chroma import Chroma
 import os
 from vector_data import vector_store
+
+
+import redis.asyncio as redis
+
+# Redis connection
+redis_client = redis.Redis(
+    host="localhost",
+    port=6379,
+    decode_responses=True,
+    max_connections=10
+)
+
+async def get_cached_or_search(cache_key, search_fn, ttl=300):
+    # 1. Try cache
+    cached = await redis_client.get(cache_key)
+    if cached:
+        return f"(cached)\n{cached}"
+
+    # 2. Run actual search
+    result = await search_fn()
+
+    # 3. Store in Redis
+    await redis_client.set(cache_key, result, ex=ttl)
+    return result
+
+
 mcp = FastMCP("Company Assistant")
 
 # 1. Initialize Ollama Embeddings
 # This must match the model you used to index the data
 # embeddings = OllamaEmbeddings(model="llama3.1")
-embeddings = OllamaEmbeddings(model="llama3.1")
+embeddings = OllamaEmbeddings(model="nomic-embed-text")
 
 
 
@@ -67,14 +93,19 @@ embeddings = OllamaEmbeddings(model="llama3.1")
 
 @mcp.tool()
 async def get_policy_by_semantic_match(query: str) -> str:
-    """Find company policies based on the meaning of your query."""
-    docs = vector_store.similarity_search(query, k=4, filter={"type": "policy"})
-    
-    if not docs:
-        return "No matching policies found."
-    for d in docs:
-        print(f"Title: {d.metadata.get('title')}, Content: {d.page_content}\n")
-    return "\n\n".join([f"Policy: {d.metadata.get('title')}\nDetails: {d.page_content}" for d in docs])
+    """Return company policies such as employee leave policy, sick leave, maternity leave, etc."""
+
+    cache_key = f"policy:{query}"
+
+    async def search():
+        docs = vector_store.similarity_search(query, k=4, filter={"type": "policy"})
+        if not docs:
+            return "No matching policies found."
+        return "\n\n".join(
+            [f"Policy: {d.metadata.get('title')}\nDetails: {d.page_content}" for d in docs]
+        )
+
+    return await get_cached_or_search(cache_key, search)
 
 
 @mcp.tool()
@@ -82,25 +113,33 @@ async def login_credentials(query: str) -> str:
     """Provide login support for various company platforms.
     Answer queries such as:
     - "How can i reset my password?" or "What if I forget my ERP password?" 
-    - "How can I access my personal and official information in the ERP system?"
-    - "How do I edit my personal information in the ERP system?"
     """
-    docs = vector_store.similarity_search(query, k=4,filter={"type": "login"})
+    cache_key = f"login:{query}"
 
-    if not docs:
-        return "No relevant credentials found for your query."
-    
-    return "\n\n".join([f"Question: {d.metadata.get('question')}\nAnswer: {d.page_content}" for d in docs])
-   
+    async def search():
+        docs = vector_store.similarity_search(query, k=4, filter={"type": "login"})
+        if not docs:
+            return "No relevant credentials found for your query."
+
+        return "\n\n".join(
+            [f"Question: {d.metadata.get('question')}\nAnswer: {d.page_content}" for d in docs]
+        )
+
+    return await get_cached_or_search(cache_key, search)
+
 @mcp.tool()
 async def personal_info(query: str) -> str:
-    """Provide personal information of employees related to the ERP system such as how to access and edit personal details"""
-    docs = vector_store.similarity_search(query, k=2, filter={"type": "personal_info"})
+    """Provide personal information of employees related to the ERP system such as how to access and edit personal details."""
+    cache_key=f"personal_info:{query}"
 
-    if not docs:
-        return "No relevant credentials found for your query."
+    async def search():
+        docs = vector_store.similarity_search(query, k=3, filter={"type": "personal_info"})
+
+        if not docs:
+            return "No relevant credentials found for your query."
     
-    return "\n\n".join([f"Question: {d.metadata.get('question')}\nAnswer: {d.page_content}" for d in docs])
+        return "\n\n".join([f"Question: {d.metadata.get('question')}\nAnswer: {d.page_content}" for d in docs])
+    return await get_cached_or_search(cache_key, search)
    
 if __name__ == "__main__":
     mcp.run(transport="stdio")

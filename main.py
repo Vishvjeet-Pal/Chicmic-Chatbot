@@ -4,10 +4,13 @@ from langchain_ollama import ChatOllama
 from langchain.agents import create_agent
 from langchain_core.messages import HumanMessage
 from langchain_mcp_adapters.client import MultiServerMCPClient
+from langchain_groq import ChatGroq
+from config import settings
 
 app = FastAPI()
 
 llm = ChatOllama(model="llama3.1", temperature=0)
+# llm = ChatGroq(model="llama-3.3-70b-versatile", temperature=0, api_key=settings.GROQ_API_KEY)
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 server_path = os.path.join(current_dir, "mcp_server.py")
@@ -28,9 +31,8 @@ system_prompt = """You are a Task Management Assistant. Use tools to query the D
 If you can not decide which tool to use, say you don't know
 After receiving tool results, you MUST return the final answer to the user.
 Do NOT call tools again if the answer is found.
-Do NOT output JSON.
 Return ONLY the final answer text.
-DO NOT mention the tools in your answer.
+DO NOT mention the tools used.
 """
 
 
