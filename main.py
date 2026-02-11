@@ -7,7 +7,7 @@ from langchain_mcp_adapters.client import MultiServerMCPClient
 
 app = FastAPI()
 
-llm = ChatOllama(model="llama3.1", temperature=0)
+llm = ChatOllama(model="llama3.1:8b", temperature=0)
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 server_path = os.path.join(current_dir, "mcp_server.py")
@@ -22,7 +22,8 @@ async def get_mcp_tools():
     })
     return await client.get_tools()
 
-system_prompt = "You are a Task Management Assistant. Use tools to query the DB. Answer user queries based on the retrieved information. If you don't know the answer, say you don't know. ONLY answer what is asked. DO NOT provide extra information."
+system_prompt = """You are a Task Management Assistant. Use tools to query the DB. Answer user queries based on the retrieved information. If you don't know the answer, say you don't know. ONLY answer what is asked. DO NOT provide extra information. If you are not sure which tool to use, use search_faq first to check if the answer is in the FAQs.
+If you can not decide which tool to use, say you don't know"""
 
 @app.post("/ask")
 async def ask_chatbot(query: str):

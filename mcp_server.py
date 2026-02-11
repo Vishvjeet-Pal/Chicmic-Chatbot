@@ -42,11 +42,15 @@ mcp = FastMCP("Company Assistant")
 
 # 1. Initialize Ollama Embeddings
 # This must match the model you used to index the data
-embeddings = OllamaEmbeddings(model="llama3.1")
+# embeddings = OllamaEmbeddings(model="llama3.1")
+embeddings = OllamaEmbeddings(model="llama3.1:8b")
+
+
 
 @mcp.tool()
 async def search_faq(query: str) -> str:
-    """Find answers to FAQs using semantic similarity search."""
+    """Find answers to FAQs using semantic similarity search.
+    Answer frequently asked questions such as "How do I reset my password?" or "What are office hours?"."""
     # Perform similarity search instead of SQL WHERE
     docs = vector_store.similarity_search(query, k=3, filter={"type": "faq"})
     
