@@ -7,7 +7,7 @@ from langchain_mcp_adapters.client import MultiServerMCPClient
 
 app = FastAPI()
 
-llm = ChatOllama(model="llama3.1:8b", temperature=0)
+llm = ChatOllama(model="llama3.1", temperature=0)
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 server_path = os.path.join(current_dir, "mcp_server.py")

@@ -43,7 +43,7 @@ mcp = FastMCP("Company Assistant")
 # 1. Initialize Ollama Embeddings
 # This must match the model you used to index the data
 # embeddings = OllamaEmbeddings(model="llama3.1")
-embeddings = OllamaEmbeddings(model="llama3.1:8b")
+embeddings = OllamaEmbeddings(model="llama3.1")
 
 
 
@@ -67,13 +67,35 @@ async def search_faq(query: str) -> str:
 
 @mcp.tool()
 async def get_policy_by_semantic_match(query: str) -> str:
-    """Find university policies based on the meaning of your query."""
-    docs = vector_store.similarity_search(query, k=2, filter={"type": "policy"})
+    """Find company policies based on the meaning of your query."""
+    docs = vector_store.similarity_search(query, k=2)
     
     if not docs:
         return "No matching policies found."
-    
+    for d in docs:
+        print(f"Title: {d.metadata.get('title')}, Content: {d.page_content}\n")
     return "\n\n".join([f"Policy: {d.metadata.get('title')}\nDetails: {d.page_content}" for d in docs])
 
+
+@mcp.tool()
+async def login_credentials(query: str) -> str:
+    """Provide login support for various company platforms."""
+    docs = vector_store.similarity_search(query, k=2)
+
+    if not docs:
+        return "No relevant credentials found for your query."
+    
+    return "\n\n".join([f"Question: {d.metadata.get('question')}\nAnswer: {d.page_content}" for d in docs])
+   
+@mcp.tool()
+async def personal_info(query: str) -> str:
+    """Provide login support for various company platforms."""
+    docs = vector_store.similarity_search(query, k=2, filter={"type": "personal_info"})
+
+    if not docs:
+        return "No relevant credentials found for your query."
+    
+    return "\n\n".join([f"Question: {d.metadata.get('question')}\nAnswer: {d.page_content}" for d in docs])
+   
 if __name__ == "__main__":
     mcp.run(transport="stdio")
