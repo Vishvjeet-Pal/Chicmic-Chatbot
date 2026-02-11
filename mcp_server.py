@@ -144,7 +144,8 @@ embeddings = OllamaEmbeddings(model="nomic-embed-text")
 @mcp.tool()
 async def search_pdf_policy(query: str) -> str:
     """Search information from uploaded company policy PDF documents.
-    Provide information about company policies such as leave policy, sick leave, maternity leave, etc. based on the content of the uploaded PDF documents."""
+    Provide information about company policies such as leave policy, sick leave, maternity leave, etc. based on the content of the uploaded PDF documents.
+    Provide hol"""
 
     cache_key = f"pdf_policy:{query}"
 

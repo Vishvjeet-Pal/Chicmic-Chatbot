@@ -8,7 +8,7 @@ import os
 from mcp_server import vector_store
 
 # PERSIST_DIR = "./chroma_db"
-PDF_PATH = "./data/leave_policy.pdf"   # <-- your pdf path
+PDF_PATH = "./data/holiday_policy.pdf"   # <-- your pdf path
 
 def extract_pdf_text(path):
     reader = PdfReader(path)
