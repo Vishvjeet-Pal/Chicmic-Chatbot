@@ -47,28 +47,28 @@ embeddings = OllamaEmbeddings(model="llama3.1")
 
 
 
-@mcp.tool()
-async def search_faq(query: str) -> str:
-    """Find answers to FAQs using semantic similarity search.
-    Answer frequently asked questions such as "How do I reset my password?" or "What are office hours?"."""
-    # Perform similarity search instead of SQL WHERE
-    docs = vector_store.similarity_search(query, k=3, filter={"type": "faq"})
+# @mcp.tool()
+# async def search_faq(query: str) -> str:
+#     """Find answers to FAQs using semantic similarity search.
+#     Answer frequently asked questions such as "How do I reset my password?" or "What are office hours?"."""
+#     # Perform similarity search instead of SQL WHERE
+#     docs = vector_store.similarity_search(query, k=3, filter={"type": "faq"})
     
-    if not docs:
-        return "No relevant FAQ found for your query."
+#     if not docs:
+#         return "No relevant FAQ found for your query."
     
-    results = []
-    for doc in docs:
-        results.append(f"Q: {doc.metadata.get('question')}\nA: {doc.page_content}")
+#     results = []
+#     for doc in docs:
+#         results.append(f"Q: {doc.metadata.get('question')}\nA: {doc.page_content}")
     
-    return "\n---\n".join(results)
+#     return "\n---\n".join(results)
 
 
 
 @mcp.tool()
 async def get_policy_by_semantic_match(query: str) -> str:
     """Find company policies based on the meaning of your query."""
-    docs = vector_store.similarity_search(query, k=2)
+    docs = vector_store.similarity_search(query, k=4, filter={"type": "policy"})
     
     if not docs:
         return "No matching policies found."
@@ -79,8 +79,13 @@ async def get_policy_by_semantic_match(query: str) -> str:
 
 @mcp.tool()
 async def login_credentials(query: str) -> str:
-    """Provide login support for various company platforms."""
-    docs = vector_store.similarity_search(query, k=2)
+    """Provide login support for various company platforms.
+    Answer queries such as:
+    - "How can i reset my password?" or "What if I forget my ERP password?" 
+    - "How can I access my personal and official information in the ERP system?"
+    - "How do I edit my personal information in the ERP system?"
+    """
+    docs = vector_store.similarity_search(query, k=4,filter={"type": "login"})
 
     if not docs:
         return "No relevant credentials found for your query."
@@ -89,7 +94,7 @@ async def login_credentials(query: str) -> str:
    
 @mcp.tool()
 async def personal_info(query: str) -> str:
-    """Provide login support for various company platforms."""
+    """Provide personal information of employees related to the ERP system such as how to access and edit personal details"""
     docs = vector_store.similarity_search(query, k=2, filter={"type": "personal_info"})
 
     if not docs:

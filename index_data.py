@@ -36,10 +36,13 @@ async def index_all():
                 metadata={"type": "policy", "title": p.title, "category": p.category}
             ) for p in policies
         ]
-        
+        for p in policies:
+            print(f"Title: {p.title}, Description: {p.description}, Category: {p.category}")
         # Add to Chroma
+
         if personal_faq_docs or policy_docs or login_faq_docs:
             vector_store.add_documents(login_faq_docs+personal_faq_docs + policy_docs)
+            print(f"Indexed {len(login_faq_docs)} login FAQs, {len(personal_faq_docs)} personal info FAQs, and {len(policy_docs)} policies to Vector Store.")
             print("Successfully indexed all data to Vector Store!")
 
 if __name__ == "__main__":

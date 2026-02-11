@@ -1,7 +1,15 @@
+# virtual env
 .venv/
-.env/
 
+# env file
+.env
+
+# python cache
 __pycache__/
 *.pyc
 
-*.db/
+# sqlite
+*.db
+
+# chroma db folder
+chroma_db/

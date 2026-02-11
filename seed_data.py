@@ -14,7 +14,7 @@ def seed_data():
             Policy(title="Referral Policy", category="referral", description="To refer a potential employee, an employee shall email the detail of the position applied for and submit to HR along with the resume of the candidate. Employees shall be eligible for a referral award only when the referred candidate has not applied to the organization through direct channels and has not given an interview in the last one year. For each referral hiring, the organization shall pay the referral incentive as per the Schedule 1 published by HR via email for open positions from time to time. The referral incentive payout shall be uniform, irrespective of the role/level of the referee. The referral incentive payment shall happen only when the newly hired employee has worked at least 90 days in the organization and his/her probation is confirmed. If more than one employee refers to the same candidate, the first referee shall receive the referral incentive."),
             Policy(title="Leave Policy", category="leave", description="Confirmed employees can take 16 days leave per annum. Trainees/Consultants can take 1 leave per month."),
             Policy(title="Travel Policy", category="Finance", description="Reimbursement rules for business trips."),
-            Policy(title="Casual/Sick Leave", category="leave", description="7 days per year on a use-or-lose basis. Unused leaves lapse at the end of the year with no carry forward, encashment, or payout upon separation from employment."),
+            Policy(title="Casual/Sick Leave", category="leave", description="Sick Leave policy of employee: 7 days per year on a use-or-lose basis. Unused leaves lapse at the end of the year with no carry forward, encashment, or payout upon separation from employment."),
 
 Policy(title="Earned Leave", category="leave", description="9 days paid leave per year. Leave must be availed or encashed by the end of the calendar year. Company encourages employees to take time off instead of opting for payouts."),
 
@@ -58,7 +58,8 @@ Policy(title="Leave Encashment Policy", category="leave", description="Only unus
 
         # Use add_all to insert multiple objects at once
         db.add_all(policies)
-        db.add_all(faqs)
+        db.add_all(login_credentials_faqs)
+        db.add_all(personal_info_faqs)
         
         # Commit to save changes to the database
         db.commit()
