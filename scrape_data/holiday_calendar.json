@@ -1,0 +1,57 @@
+[
+    {
+        "date": "1st January",
+        "day": "Thursday",
+        "holiday": "New Year"
+    },
+    {
+        "date": "26th January",
+        "day": "Monday",
+        "holiday": "Republic Day"
+    },
+    {
+        "date": "4th March",
+        "day": "Wednesday",
+        "holiday": "Holi"
+    },
+    {
+        "date": "3rd April",
+        "day": "Friday",
+        "holiday": "Good Friday"
+    },
+    {
+        "date": "28th August",
+        "day": "Friday",
+        "holiday": "Raksha Bandhan"
+    },
+    {
+        "date": "2nd October",
+        "day": "Friday",
+        "holiday": "Mahatma Gandhi Jayan..."
+    },
+    {
+        "date": "20th October",
+        "day": "Tuesday",
+        "holiday": "Dussehra"
+    },
+    {
+        "date": "8th November",
+        "day": "Sunday",
+        "holiday": "Diwali"
+    },
+    {
+        "date": "9th November",
+        "day": "Monday",
+        "holiday": "Diwali"
+    },
+    {
+        "date": "24th November",
+        "day": "Tuesday",
+        "holiday": "Guru Nanak\u2019s Birthda..."
+    },
+    {
+        "date": "25th December",
+        "day": "Friday",
+        "holiday": "Christmas Day"
+    }
+]
