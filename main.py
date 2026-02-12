@@ -6,6 +6,8 @@ from langchain_core.messages import HumanMessage
 from langchain_mcp_adapters.client import MultiServerMCPClient
 from langchain_groq import ChatGroq
 from config import settings
+from seed.holidays import HOLIDAYS
+from ingest.holiday_ingest import ingest_holidays_from_api
 
 app = FastAPI()
 
@@ -33,6 +35,10 @@ After receiving tool results, you MUST return the final answer to the user.
 Do NOT call tools again if the answer is found.
 Return ONLY the final answer text.
 DO NOT mention the tools used.
+If the user asks ANYTHING related to holidays
+   (examples: next holiday, upcoming holidays, holiday list, holiday date, company holidays, leave with holiday, etc.)
+   → ALWAYS return the COMPLETE Holiday Calendar provided in the context for user reference.
+     Only mention the holidays which are present in the Holiday Calendar document provided in the context. Do NOT generate or assume any holiday information that is not in the document.
 """
 
 agent = None   # global
@@ -41,6 +47,7 @@ agent = None   # global
 async def startup():
     global agent
 
+    # ingest_holidays_from_api()
     client = MultiServerMCPClient({
         "db_server": {
             "transport": "stdio",
@@ -63,22 +70,7 @@ async def ask_chatbot(query: str):
         {"messages": [HumanMessage(content=query)]}
     )
     return {"answer": result["messages"][-1].content}
- #result["messages"][-1].content}
-    # result = await agent.ainvoke({"messages": [HumanMessage(content=query)]})
-    # answer = extract_answer(result)
-    # return {"answer": answer}
-#     result = await agent.ainvoke({"messages": [HumanMessage(content=query)]})
-
-#     answer = next(
-#     (
-#         m.artifact["structured_content"]["result"]
-#         for m in reversed(result["messages"])
-#         if getattr(m, "artifact", None)
-#         and "structured_content" in m.artifact
-#         and "result" in m.artifact["structured_content"]
-#     ),
-#     "No answer found"
-# )
-
-#     return {"answer": answer}
-
+ 
+@app.get("/holidays")
+async def get_holiday_calendar():
+    return HOLIDAYS

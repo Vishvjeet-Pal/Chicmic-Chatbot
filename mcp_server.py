@@ -1,38 +1,3 @@
-# # mcp_server.py
-# from fastmcp import FastMCP
-# from sqlalchemy.future import select
-# from database import SessionLocal
-# from models import FAQ, Policy
-
-# mcp = FastMCP("Company Assistant")
-
-# @mcp.tool()
-# async def search_faq(keyword: str) -> str:
-#     """Search for frequently asked questions by a keyword."""
-#     async with AsyncSessionLocal() as session:
-#         query = select(FAQ).where(FAQ.question.contains(keyword))
-#         result = await session.execute(query)
-#         faqs = result.scalars().all()
-        
-#         if not faqs:
-#             return "No matching FAQs found."
-#         return "\n".join([f"Q: {f.question} | A: {f.answer}" for f in faqs])
-
-# @mcp.tool()
-# async def get_policy_by_category(category: str) -> str:
-#     """Retrieve all university policies within a specific category (e.g., 'Academic', 'Hostel')."""
-#     async with AsyncSessionLocal() as session:
-#         query = select(Policy).where(Policy.category == category)
-#         result = await session.execute(query)
-#         policies = result.scalars().all()
-        
-#         if not policies:
-#             return f"No policies found in category: {category}"
-#         return "\n".join([f"Title: {p.title}\nDesc: {p.description}" for p in policies])
-
-
-
-# mcp_server.py
 from mcp.server.fastmcp import FastMCP
 from langchain_ollama import OllamaEmbeddings
 from langchain_chroma import Chroma
@@ -51,24 +16,21 @@ redis_client = redis.Redis(
 )
 
 async def get_cached_or_search(cache_key, search_fn, ttl=300):
-    # 1. Try cache
+
     cached = await redis_client.get(cache_key)
     if cached:
         return f"(cached)\n{cached}"
 
-    # 2. Run actual search
+
     result = await search_fn()
 
-    # 3. Store in Redis
     await redis_client.set(cache_key, result, ex=ttl)
     return result
 
 
 mcp = FastMCP("Company Assistant")
 
-# 1. Initialize Ollama Embeddings
-# This must match the model you used to index the data
-# embeddings = OllamaEmbeddings(model="llama3.1")
+
 embeddings = OllamaEmbeddings(model="nomic-embed-text")
 
 
@@ -142,14 +104,14 @@ embeddings = OllamaEmbeddings(model="nomic-embed-text")
 #     return await get_cached_or_search(cache_key, search)
    
 @mcp.tool()
-async def search_pdf_policy(query: str) -> str:
+async def search_policy(query: str) -> str:
     """
     Search and extract information from company policy documents.
 
     This tool retrieves accurate policy details from official company documents such as:
     - Leave Policy (annual leave, earned leave, casual/sick leave, maternity leave, training leave, probation leave)
     - Leave Calculation Rules (sandwich rule, pro-rata leave, 5+2 rule, leave deduction, compensatory leave)
-    - Company Holidays (holiday calendar, national holidays, festival holidays)
+    - Company Holidays (holiday calendar)
     - Work rules related to leave (approval process, leave during training, leave during probation)
 
     Use this tool when the user asks about:
@@ -175,8 +137,7 @@ async def search_pdf_policy(query: str) -> str:
     async def search():
         docs = vector_store.similarity_search(
             query,
-            k=2,
-            filter={"type": "policy_pdf"}
+            k=5
         )
         print(docs)
         if not docs:
