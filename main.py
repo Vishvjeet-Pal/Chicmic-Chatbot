@@ -7,7 +7,8 @@ from langchain_mcp_adapters.client import MultiServerMCPClient
 from langchain_groq import ChatGroq
 from config import settings
 from seed.holidays import HOLIDAYS
-from ingest.holiday_ingest import ingest_holidays_from_api
+# from ingest.holiday_ingest import ingest_holidays_from_api
+from seed.timesheets import timesheets
 
 app = FastAPI()
 
@@ -74,3 +75,7 @@ async def ask_chatbot(query: str):
 @app.get("/holidays")
 async def get_holiday_calendar():
     return HOLIDAYS
+
+@app.get("/timesheets")
+def get_timesheets():
+    return timesheets

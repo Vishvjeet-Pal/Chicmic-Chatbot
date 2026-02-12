@@ -15,7 +15,7 @@ timesheets = [
         "notes": "Initial chatbot design.",
         "userId": "1",
         "projectManagerIds": ["11", "10"],
-        "teams": [],
+        "teams": ["Python", "AI"],
         "entryDate": "2026-02-09",
         "timesheetStatus": 2,
         "traineeTask": False,

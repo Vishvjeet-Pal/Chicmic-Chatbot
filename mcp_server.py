@@ -111,14 +111,12 @@ async def search_policy(query: str) -> str:
     This tool retrieves accurate policy details from official company documents such as:
     - Leave Policy (annual leave, earned leave, casual/sick leave, maternity leave, training leave, probation leave)
     - Leave Calculation Rules (sandwich rule, pro-rata leave, 5+2 rule, leave deduction, compensatory leave)
-    - Company Holidays (holiday calendar)
     - Work rules related to leave (approval process, leave during training, leave during probation)
 
     Use this tool when the user asks about:
     - Leave entitlement, leave balance, leave types
     - How leave is calculated or deducted
     - Sandwich rule or weekend/holiday leave counting
-    - Company holiday dates or holiday rules
     - Working on holidays or compensatory leave
     - Leave during probation or training
     - Leave approval process
@@ -167,6 +165,63 @@ async def referral_policy(query: str) -> str:
 
     return await get_cached_or_search(cache_key, search)
 
+@mcp.tool()
+async def timesheet_search(query: str) -> str:
+    """
+    Use this tool ONLY when the user asks about:
+    - projects
+    - teams
+    - timesheets
+    - tasks
+    - time spent
+    - milestones
+    - modules
+    - work logs
+    - employee work details
+
+    This tool searches timesheet/project information from the vector database.
+    """
+    cache_key = f"timesheet:{query}"
+
+    async def search():
+        docs = vector_store.similarity_search(
+            query,
+            k=2,
+            filter={"type": "timesheet"}
+        )
+        # print(docs)
+        if not docs:
+            return "No relevant information found."
+
+        return "\n\n".join([d.page_content for d in docs])
+
+    return await get_cached_or_search(cache_key, search)
+
+@mcp.tool()
+async def list_holidays(query: str) -> str:
+    """
+    Use this tool ONLY when the user asks about holidays.
+    - Company holiday dates or holiday rules
+    - Upcoming holidays or next holiday
+    - Holiday calendar for a specific year
+    - Leave planning with holidays
+    This tool searches holidays calendar from the vector database.
+    """
+    cache_key = f"holiday:{query}"
+
+    async def search():
+        docs = vector_store.similarity_search(
+            query,
+            k=2,
+            filter={"type": "holiday"}
+        )
+        # print(docs)
+        if not docs:
+            return "No relevant information found."
+
+        return "\n\n".join([d.page_content for d in docs])
+
+    return await get_cached_or_search(cache_key, search)
 
 if __name__ == "__main__":
     mcp.run(transport="stdio")
