@@ -143,9 +143,32 @@ embeddings = OllamaEmbeddings(model="nomic-embed-text")
    
 @mcp.tool()
 async def search_pdf_policy(query: str) -> str:
-    """Search information from uploaded company policy PDF documents.
-    Provide information about company policies such as leave policy, sick leave, maternity leave, etc. based on the content of the uploaded PDF documents.
-    Provide hol"""
+    """
+    Search and extract information from company policy documents.
+
+    This tool retrieves accurate policy details from official company documents such as:
+    - Leave Policy (annual leave, earned leave, casual/sick leave, maternity leave, training leave, probation leave)
+    - Leave Calculation Rules (sandwich rule, pro-rata leave, 5+2 rule, leave deduction, compensatory leave)
+    - Company Holidays (holiday calendar, national holidays, festival holidays)
+    - Work rules related to leave (approval process, leave during training, leave during probation)
+
+    Use this tool when the user asks about:
+    - Leave entitlement, leave balance, leave types
+    - How leave is calculated or deducted
+    - Sandwich rule or weekend/holiday leave counting
+    - Company holiday dates or holiday rules
+    - Working on holidays or compensatory leave
+    - Leave during probation or training
+    - Leave approval process
+    - Any question combining leave + holidays
+
+    Instructions:
+    - Extract only relevant policy information matching the user query.
+    - If multiple policies are relevant, combine them logically.
+    - If exact answer is not found, return the closest matching policy rule.
+    - If nothing relevant exists, return: "No relevant policy found."
+    - Do NOT generate information outside the documents.
+    """
 
     cache_key = f"pdf_policy:{query}"
 
@@ -156,6 +179,26 @@ async def search_pdf_policy(query: str) -> str:
             filter={"type": "policy_pdf"}
         )
         print(docs)
+        if not docs:
+            return "No relevant information found in PDF."
+
+        return "\n\n".join([d.page_content for d in docs])
+
+    return await get_cached_or_search(cache_key, search)
+
+@mcp.tool()
+async def referral_policy(query: str) -> str:
+    """Provide information about the employee referral policy based on the content of the uploaded PDF documents."""
+
+    cache_key = f"referral_policy:{query}"
+
+    async def search():
+        docs = vector_store.similarity_search(
+            query,
+            k=2,
+            filter={"type": "referral_pdf"}
+        )
+        # print(docs)
         if not docs:
             return "No relevant information found in PDF."
 

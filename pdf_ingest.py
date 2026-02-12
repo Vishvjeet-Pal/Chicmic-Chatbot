@@ -7,8 +7,8 @@ from langchain_core.documents import Document
 import os
 from mcp_server import vector_store
 
-# PERSIST_DIR = "./chroma_db"
-PDF_PATH = "./data/holiday_policy.pdf"   # <-- your pdf path
+PERSIST_DIR = "./chroma_db"
+PDF_PATH = "./data/referral_policy.pdf"   # <-- your pdf path
 
 def extract_pdf_text(path):
     reader = PdfReader(path)
@@ -48,8 +48,8 @@ def main():
             Document(
                 page_content=chunk,
                 metadata={
-                    "type": "policy_pdf",   # IMPORTANT filter tag
-                    "source": "policy.pdf"
+                    "type": "referral_pdf",   # IMPORTANT filter tag
+                    "source": "referral.pdf"
                 }
             )
         )
