@@ -19,7 +19,12 @@ def scrape_policy(driver):
 
     policy_text = policy_element.text
 
-    with open(os.path.join(DATA_FOLDER, "referral_policy.json"), "w", encoding="utf-8") as f:
-        json.dump({"referral_policies": policy_text}, f, indent=4)
+    # with open(os.path.join(DATA_FOLDER, "referral_policy.json"), "w", encoding="utf-8") as f:
+    #     json.dump({"referral_policies": policy_text}, f, indent=4)
+
+    file_path = os.path.join(DATA_FOLDER, "referral_policy.py")
+
+    with open(file_path, "w", encoding="utf-8") as f:
+     f.write(f'referral_policies = """{policy_text}"""')
 
     print("✅ Policy scraped and saved")

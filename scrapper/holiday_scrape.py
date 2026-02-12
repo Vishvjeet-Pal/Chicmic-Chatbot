@@ -32,7 +32,13 @@ def scrape_holiday_calendar(driver):
                 "holiday": cells[2].text.strip()
             })
 
-    with open(os.path.join(DATA_FOLDER, "holiday_calendar.json"), "w", encoding="utf-8") as f:
-        json.dump(holidays, f, indent=4)
+    # with open(os.path.join(DATA_FOLDER, "holiday_calendar.json"), "w", encoding="utf-8") as f:
+    #     json.dump(holidays, f, indent=4)
+        
+
+    file_path = os.path.join(DATA_FOLDER, "holiday_calendar.py")
+
+    with open(file_path, "w", encoding="utf-8") as f:
+     f.write(f'holiday_calendar = """{holidays}"""')
 
     print("✅ Holiday calendar scraped successfully")

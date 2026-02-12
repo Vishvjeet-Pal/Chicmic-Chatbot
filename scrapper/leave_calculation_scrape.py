@@ -20,7 +20,12 @@ def scrape_leave_calculation(driver):
 
     policy_text = policy_element.text
 
-    with open(os.path.join(DATA_FOLDER, "leave_calculation_policy.json"), "w", encoding="utf-8") as f:
-        json.dump({"leave_calculation_policies": policy_text}, f, indent=4)
+    # with open(os.path.join(DATA_FOLDER, "leave_calculation_policy.json"), "w", encoding="utf-8") as f:
+    #     json.dump({"leave_calculation_policies": policy_text}, f, indent=4)
+
+    file_path = os.path.join(DATA_FOLDER, "leave_calculation_policy.py")
+
+    with open(file_path, "w", encoding="utf-8") as f:
+     f.write(f'leave_calculation_policies = """{policy_text}"""')
 
     print("✅ Policy scraped and saved")

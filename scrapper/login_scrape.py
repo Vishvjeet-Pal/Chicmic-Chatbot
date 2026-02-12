@@ -5,6 +5,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from config import settings
 
 
+
 def login(driver):
     driver.get(settings.LOGIN_URL)
 
