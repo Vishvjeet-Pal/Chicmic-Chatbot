@@ -1,12 +1,13 @@
 import requests
 from langchain_core.documents import Document
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 import os, sys
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 parent_dir = os.path.dirname(current_dir)
 sys.path.append(parent_dir)
 
-from vector_data import vector_store
+from mcp_server import vector_store
 
 API_URL = "http://localhost:8000/timesheets"
 

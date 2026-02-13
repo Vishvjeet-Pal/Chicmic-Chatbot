@@ -1,0 +1,7 @@
+[02/13/26 14:12:02] INFO     HTTP Request: POST                  _client.py:1025
+                             http://127.0.0.1:11434/api/embed                   
+                             "HTTP/1.1 200 OK"                                  
+⏳ Running Timesheet ingestion job...
+Fetching timesheets from API...
+1 timesheets stored in vector DB.
+✅ Timesheets ingestion completed

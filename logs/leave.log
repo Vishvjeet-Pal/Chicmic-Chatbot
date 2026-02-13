@@ -1,0 +1,8 @@
+[02/13/26 14:12:14] INFO     HTTP Request: POST                  _client.py:1025
+                             http://127.0.0.1:11434/api/embed                   
+                             "HTTP/1.1 200 OK"                                  
+✅ Login successful
+Opening policy page...
+✅ Policy scraped and saved
+✅ 9 new/updated chunks added to vector DB
+✅ Yearly scrape + ingest completed
