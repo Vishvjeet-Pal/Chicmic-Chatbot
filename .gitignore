@@ -1,9 +1,10 @@
 # virtual env
 .venv/
+venv/
 
 # env file
 .env
-venv/
+
 # python cache
 __pycache__/
 *.pyc
@@ -13,3 +14,8 @@ __pycache__/
 
 # chroma db folder
 chroma_db/
+
+# logs (ignore all log files but keep folder)
+logs/*
+!logs/.gitkeep
+ 
