@@ -260,7 +260,7 @@ async def list_holidays(query: str) -> str:
         docs = vector_store.similarity_search(
             query,
             k=2,
-            filter={"type": "holiday"}
+            filter={"type": "holiday_calendar"}
         )
         # print(docs)
         if not docs:

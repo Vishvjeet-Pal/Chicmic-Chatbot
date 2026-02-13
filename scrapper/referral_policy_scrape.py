@@ -9,7 +9,7 @@ DATA_FOLDER = "scrape_data"
 os.makedirs(DATA_FOLDER, exist_ok=True)
 
 
-def scrape_policy(driver):
+def scrape_referral_policy(driver):
     print("Opening policy page...")
     driver.get(settings.POLICY_URL)
 
