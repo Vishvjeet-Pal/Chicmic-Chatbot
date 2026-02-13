@@ -1,29 +1,5 @@
-# from langchain.schema import Document
-# from scrape_data.referral_policy import referral_policies
-# from langachain_text_splitter import RecursiveCharacterTextSplitter
-# from mcp_server import vector_store
-
-# def ingest_referral_policy():
-#     docs=[
-#         Document(
-#             page_content = referral_policies,
-#             metadata = {"source": "referral_policy", "type":"referral_policy"}
-#         )
-#     ]
-
-#     splitter= RecursiveCharacterTextSplitter(
-#         chunk_size=800,
-#         chunk_overlap=100
-#     )
-
-#     split_docs= splitter.split_documents(docs)
-
-#     vector_store.add_documents(split_docs)
-
-# if __name__ == "__main__":
-#     ingest_referral_policy()
-
 from langchain_core.documents import Document
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 import os, sys
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -33,9 +9,7 @@ parent_dir = os.path.dirname(current_dir)
 
 # Add to system path
 sys.path.append(parent_dir)
-from langchain.docstore.document import Document
 from scrape_data.referral_policy import referral_policies
-from langachain_text_splitter import RecursiveCharacterTextSplitter
 from mcp_server import vector_store
 import hashlib
 import datetime
@@ -43,11 +17,9 @@ import datetime
 def get_chunk_id(text: str) -> str:
     return hashlib.md5(text.encode("utf-8")).hexdigest()
 
-def ingest_referral_policy(policy_text=None):
-    if policy_text is None:
-        from scrape_data.referral_policy import referral_policies as policy_text
 
-    docs = [
+def ingest_referral_policy():
+    docs=[
         Document(
             page_content=policy_text,
             metadata={"source": "referral_policy", "type": "referral_policy"}
@@ -75,10 +47,8 @@ def ingest_referral_policy(policy_text=None):
         if chunk_id not in existing_ids:
             new_chunks.append(chunk)
 
-    # Delete removed chunks
-    for d in existing_docs:
-        if d.metadata.get("chunk_id") not in new_chunk_ids:
-            vector_store.delete(filter={"chunk_id": d.metadata.get("chunk_id")})
+    vector_store.add_documents(split_docs)
+    print("Referral policy ingested successfully")
 
     # Add new chunks
     if new_chunks:

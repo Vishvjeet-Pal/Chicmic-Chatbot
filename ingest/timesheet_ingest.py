@@ -47,8 +47,14 @@ def ingest_timesheets():
             )
         )
 
-    vector_store.add_documents(docs)
+    splitter= RecursiveCharacterTextSplitter(
+        chunk_size=800,
+        chunk_overlap=100
+    )
 
+    split_docs= splitter.split_documents(docs)
+
+    vector_store.add_documents(split_docs)
     print(f"{len(docs)} timesheets stored in vector DB.")
 
 
