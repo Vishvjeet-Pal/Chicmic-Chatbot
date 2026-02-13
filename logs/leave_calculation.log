@@ -1,0 +1,12 @@
+[02/13/26 14:12:11] INFO     HTTP Request: POST                  _client.py:1025
+                             http://127.0.0.1:11434/api/embed                   
+                             "HTTP/1.1 200 OK"                                  
+🔐 Logging in...
+✅ Login successful
+📄 Scraping Leave Calculation Policy...
+Opening leave calculation page...
+✅ Policy scraped and saved
+Total chunks created: 16
+✅ 16 new/updated leave-calculation chunks added
+✅ Leave Calculation Policy updated
+🧹 Driver closed

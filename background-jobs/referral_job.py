@@ -1,4 +1,13 @@
 from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
+
+options = Options()
+options.add_argument("--headless=new")   # IMPORTANT
+options.add_argument("--no-sandbox")
+options.add_argument("--disable-dev-shm-usage")
+options.add_argument("--disable-gpu")
+options.add_argument("--window-size=1920,1080")
+
 import os, sys
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -11,7 +20,7 @@ from ingest.referral_ingest import ingest_referral_policy
 
 
 def main():
-    driver = webdriver.Chrome()
+    driver = webdriver.Chrome(options=options)
 
     try:
         print("🔐 Logging in...")
