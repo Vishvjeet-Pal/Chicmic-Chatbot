@@ -32,29 +32,43 @@ def ingest_leave_policy(policy_text=None):
     )
     split_docs = splitter.split_documents(docs)
 
-    # Existing chunks in vector DB
-    existing_docs = vector_store._collection.get(filter={"type": "leave_policy"})
-    existing_ids = [d.metadata.get("chunk_id") for d in existing_docs if d.metadata.get("chunk_id")]
+    # 🔹 Get existing metadata from Chroma (dict format)
+    existing = vector_store._collection.get(where={"type": "leave_policy"})
+    existing_metadatas = existing.get("metadatas", []) or []
+
+    existing_ids = {
+        m.get("chunk_id")
+        for m in existing_metadatas
+        if m and m.get("chunk_id")
+    }
 
     new_chunks = []
-    new_chunk_ids = []
+    new_chunk_ids = set()
 
+    # 🔹 Prepare new chunks
     for chunk in split_docs:
         chunk_id = get_chunk_id(chunk.page_content)
+
         chunk.metadata["chunk_id"] = chunk_id
         chunk.metadata["updated_at"] = datetime.date.today().isoformat()
-        new_chunk_ids.append(chunk_id)
+        chunk.metadata["source"] = "leave_policy"
+        chunk.metadata["type"] = "leave_policy"
+
+        new_chunk_ids.add(chunk_id)
+
         if chunk_id not in existing_ids:
             new_chunks.append(chunk)
 
-    # Delete removed chunks
-    for d in existing_docs:
-        if d.metadata.get("chunk_id") not in new_chunk_ids:
-            vector_store.delete(filter={"chunk_id": d.metadata.get("chunk_id")})
+    # 🔹 Delete removed/changed chunks
+    chunks_to_delete = existing_ids - new_chunk_ids
 
-    # Add new chunks
+    for cid in chunks_to_delete:
+        vector_store._collection.delete(where={"chunk_id": cid})
+
+    # 🔹 Add new chunks
     if new_chunks:
         vector_store.add_documents(new_chunks)
-        print(f"✅ {len(new_chunks)} new chunks added to vector DB")
+        print(f"✅ {len(new_chunks)} new/updated chunks added to vector DB")
     else:
-        print("✅ No new updates found. Vector DB is up to date.")
+        print("✅ No changes detected. Vector DB already up to date.")
+

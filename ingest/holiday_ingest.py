@@ -39,7 +39,7 @@ def ingest_holidays_from_api():
             Document(
                 page_content=text,
                 metadata={
-                    "type": "holiday",
+                    "type": "holiday_calendar",
                     "year": "2026",
                 }
             )
