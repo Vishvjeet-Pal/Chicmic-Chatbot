@@ -1,7 +1,17 @@
-from langchain.schema import Document
+from langchain_core.documents import Document
 from scrape_data.holiday_calendar import holiday_calendar
-from langachain_text_splitter import RecursiveCharacterTextSplitter
+from langachain_text_splitters import RecursiveCharacterTextSplitter
 from mcp_server import vector_store
+import os, sys
+
+current_dir = os.path.dirname(os.path.abspath(__file__))
+
+# Parent directory
+parent_dir = os.path.dirname(current_dir)
+
+# Add to system path
+sys.path.append(parent_dir)
+
 
 def ingest_holiday_calendar():
     docs=[

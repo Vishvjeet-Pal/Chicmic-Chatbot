@@ -4,7 +4,7 @@ from langchain_ollama import ChatOllama
 from langchain.agents import create_agent
 from langchain_core.messages import HumanMessage
 from langchain_mcp_adapters.client import MultiServerMCPClient
-from langchain_groq import ChatGroq
+# from langchain_groq import ChatGroq
 from config import settings
 from seed.holidays import HOLIDAYS
 # from ingest.holiday_ingest import ingest_holidays_from_api

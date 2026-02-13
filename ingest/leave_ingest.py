@@ -1,6 +1,13 @@
-from langchain.schema import Document
+import os
+import sys
+
+current_dir = os.path.dirname(os.path.abspath(__file__))
+parent_dir = os.path.dirname(current_dir)
+sys.path.append(parent_dir)
+
+from langchain_core.documents import Document
 from scrape_data.leave_policy import leave_policies
-from langachain_text_splitter import RecursiveCharacterTextSplitter
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 from mcp_server import vector_store
 
 def ingest_leave_policy():

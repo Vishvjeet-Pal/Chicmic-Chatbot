@@ -1,7 +1,17 @@
-from langchain.schema import Document
+from langchain_core.documents import Document
+from langchain_text_splitters import RecursiveCharacterTextSplitter
+import os, sys
+
+current_dir = os.path.dirname(os.path.abspath(__file__))
+
+# Parent directory
+parent_dir = os.path.dirname(current_dir)
+
+# Add to system path
+sys.path.append(parent_dir)
 from scrape_data.referral_policy import referral_policies
-from langachain_text_splitter import RecursiveCharacterTextSplitter
 from mcp_server import vector_store
+
 
 def ingest_referral_policy():
     docs=[
@@ -19,6 +29,7 @@ def ingest_referral_policy():
     split_docs= splitter.split_documents(docs)
 
     vector_store.add_documents(split_docs)
+    print("Referral policy ingested successfully")
 
 if __name__ == "__main__":
     ingest_referral_policy()
