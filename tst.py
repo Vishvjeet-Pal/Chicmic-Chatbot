@@ -16,5 +16,5 @@
 #     print(meta)
 #     print("\n" + "="*50 + "\n")
 
-from scrape_data.leave_policy import leave_policies
-print(leave_policies)
+from scrape_data.leave_calculation_policy import leave_calculation_policies
+print(leave_calculation_policies)
