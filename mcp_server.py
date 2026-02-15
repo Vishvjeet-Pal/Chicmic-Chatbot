@@ -285,18 +285,25 @@ async def list_holidays(query: str) -> str:
 # Extracting data from API
 
 @mcp.tool()
-async def get_user_profile_data(auth_token: str="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2OTViNmRlZjIwY2NmNzM0ZGE4ZDRkMGMiLCJ0aW1lIjoxNzcxMTQ1NjkzMTA0LCJpYXQiOjE3NzExNDU2OTMsImV4cCI6MTc3MzczNzY5M30.h57fxP4s1kGf_Wvo3yGrU7MtfTDuRktWQhiHg-A3_jA") -> str:
+async def get_user_profile_data(config: RunnableConfig) -> str:
     """
-    Fetches the current logged-in user's profile details (email, joining date, etc.)
-    from the company API using their active Auth Token.
+    Fetches the current logged-in user's profile details such as:
+    - My Name
+    - My email
+    - My joining data
+    - My Employee Id
+    - My Official Email
+    - My teams
+    - My leave Balance
+    - My role
+    - My shift timing
     """
     PROFILE_API_URL = "https://api.portal.chicmicstudios.in/v1/user?_id=695b6def20ccf734da8d4d0c"
     
     headers = {
-        "Authorization": auth_token,
+        "Authorization": config.get("configurable",{}).get("auth_token",""),
         "Content-Type": "application/json"
     }
-
     async with httpx.AsyncClient() as client:
         try:
             response = await client.get(PROFILE_API_URL, headers=headers)
@@ -314,7 +321,6 @@ async def get_user_profile_data(auth_token: str="eyJhbGciOiJIUzI1NiIsInR5cCI6Ikp
                     f"- Leave Balance: {data.get("leaveBalance")}\n"
                     f"- Role: {data.get("roleData").get("name")}\n"
                     f"- Shift Time: {data.get("minInTime")}"
-                    # f"- Designation: {data.get('designation')}"
                 )
                 return profile_info
             else:
@@ -323,7 +329,7 @@ async def get_user_profile_data(auth_token: str="eyJhbGciOiJIUzI1NiIsInR5cCI6Ikp
             return f"Failed to connect to profile API: {str(e)}"
 
 @mcp.tool()
-async def get_user_leaves(config: RunnableConfig):
+async def get_user_leaves(config: RunnableConfig)-> str:
     """  
     This tool provides details / history of leaves taken by the user.
     It describes:
@@ -348,7 +354,6 @@ async def get_user_leaves(config: RunnableConfig):
             response=await client.post(USER_LEAVES_API,headers=headers,json=body)
             if response.status_code==200:
                 data=response.json()['data']['data']
-                # return [data]
                 return "\n\n".join([
                 f"(Leave Reason/Comment: {leave.get('reason')}\n"
                 f"Date: {leave.get("fromDate")} to {leave.get("toDate")}\n"
