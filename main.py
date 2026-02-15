@@ -66,9 +66,14 @@ async def startup():
     )
 
 @app.post("/ask")
-async def ask_chatbot(query: str):
+async def ask_chatbot(query: str, authorization: str):
     result = await agent.ainvoke(
-        {"messages": [HumanMessage(content=query)]}
+        {"messages": [HumanMessage(content=query)]},
+        config={
+            "configurable":{
+                "auth_token": authorization
+            }
+        }
     )
     return {"answer": result["messages"][-1].content}
  
