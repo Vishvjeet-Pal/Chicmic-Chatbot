@@ -1,7 +1,7 @@
 from mcp.server.fastmcp import FastMCP
 from langchain_ollama import OllamaEmbeddings
-from langchain_chroma import Chroma
 import os
+import httpx
 from vector_data import vector_store
 
 
@@ -269,6 +269,48 @@ async def list_holidays(query: str) -> str:
         return "\n\n".join([d.page_content for d in docs])
 
     return await get_cached_or_search(cache_key, search)
+
+# Extracting data from API
+
+@mcp.tool()
+async def get_user_profile_data(auth_token: str="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2OTViNmRlZjIwY2NmNzM0ZGE4ZDRkMGMiLCJ0aW1lIjoxNzcxMTQ1NjkzMTA0LCJpYXQiOjE3NzExNDU2OTMsImV4cCI6MTc3MzczNzY5M30.h57fxP4s1kGf_Wvo3yGrU7MtfTDuRktWQhiHg-A3_jA") -> str:
+    """
+    Fetches the current logged-in user's profile details (email, joining date, etc.)
+    from the company API using their active Auth Token.
+    """
+    # Replace this with your actual existing API endpoint
+    PROFILE_API_URL = "https://api.portal.chicmicstudios.in/v1/user?_id=695b6def20ccf734da8d4d0c"
+    
+    headers = {
+        "Authorization": auth_token,
+        "Content-Type": "application/json"
+    }
+
+    async with httpx.AsyncClient() as client:
+        try:
+            response = await client.get(PROFILE_API_URL, headers=headers)
+            if response.status_code == 200:
+                data = response.json()['data']
+                profile_info = (
+                    f"User Profile Found:\n"
+                    f"- Name: {data.get('name')}\n"
+                    f"- Email: {data.get('personalEmail')}\n"
+                    f"- Joining Date: {data.get('joiningDate')}\n"
+                    f"- Employee Id: {data.get('employeeId')}\n"
+                    f"- Official Email: {data.get('officialEmail')}\n"
+                    f"- Teams: {[team.get('name') for team in data.get('teams')]}\n"
+                    f"- Waiver Count: {data.get("waiverCount")}\n"
+                    f"- Leave Balance: {data.get("leaveBalance")}\n"
+                    f"- Role: {data.get("roleData").get("name")}\n"
+                    f"- Shift Time: {data.get("minInTime")}"
+                    # f"- Designation: {data.get('designation')}"
+                )
+                return profile_info
+            else:
+                return f"Error: Received {response.status_code} from API."
+        except Exception as e:
+            return f"Failed to connect to profile API: {str(e)}"
+
 
 if __name__ == "__main__":
     mcp.run(transport="stdio")

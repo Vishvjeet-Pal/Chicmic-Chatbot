@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from database import AsyncSessionLocal, engine_sync, Base, SessionLocal
+from database import engine_sync, Base, SessionLocal
 from models.policy import Policy
 from models.login import Login
 from models.personal_info import PersonalInfo
