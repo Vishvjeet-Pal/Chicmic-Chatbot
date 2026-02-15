@@ -1,5 +1,5 @@
 import os
-from fastapi import FastAPI
+from fastapi import FastAPI, Body
 from langchain_ollama import ChatOllama
 from langchain.agents import create_agent
 from langchain_core.messages import HumanMessage
@@ -66,12 +66,13 @@ async def startup():
     )
 
 @app.post("/ask")
-async def ask_chatbot(query: str, authorization: str):
+async def ask_chatbot(query: str, authorization: str, request_data: dict=Body(default={})):
     result = await agent.ainvoke(
         {"messages": [HumanMessage(content=query)]},
         config={
             "configurable":{
-                "auth_token": authorization
+                "auth_token": authorization,
+                "request_data": request_data
             }
         }
     )

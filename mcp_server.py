@@ -322,6 +322,47 @@ async def get_user_profile_data(auth_token: str="eyJhbGciOiJIUzI1NiIsInR5cCI6Ikp
         except Exception as e:
             return f"Failed to connect to profile API: {str(e)}"
 
+@mcp.tool()
+async def get_user_leaves(config: RunnableConfig):
+    """  
+    This tool provides details / history of leaves taken by the user.
+    It describes:
+    - applied date of leave
+    - leave duration
+    - leave status
+    - leave reason
+    - leave send to
+    - total leaves taken
+    """
+    USER_LEAVES_API="https://api.portal.chicmicstudios.in/v1/leave/history"
+
+    headers={
+        "authorization": config.get("configurable",{}).get("auth_token"),
+        "content-type": "application/json"
+    }
+
+    body=config.get("configurable",{}).get("request_data",{})
+
+    async with httpx.AsyncClient() as client:
+        try:
+            response=await client.post(USER_LEAVES_API,headers=headers,json=body)
+            if response.status_code==200:
+                data=response.json()['data']['data']
+                # return [data]
+                return "\n\n".join([
+                f"(Leave Reason/Comment: {leave.get('reason')}\n"
+                f"Date: {leave.get("fromDate")} to {leave.get("toDate")}\n"
+                f"Status: {'Pending' if leave.get('status')==1 else "Approved"}\n"
+                f"Leave application is sent to {[manager.get('name') for manager in leave.get("sendTo")]}\n"
+                f"Duration of the leave is {leave.get("totalDays")}\n"
+                f"Leave Type: {leave.get("leaveType")} -> {leave.get("leaveReasonName")}\n"
+                f"Is sandwich applied: {'Yes' if leave.get("isSandwichApplied") else 'No'})\n"
+                for leave in data
+                ])
+            else:
+                return f"Error: Recieved status code {response.status_code} from API"
+        except Exception as e:
+            return f"Failed to connect to the leaves history API: {str(e)}"
 
 if __name__ == "__main__":
     mcp.run(transport="stdio")
