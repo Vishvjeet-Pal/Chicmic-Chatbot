@@ -1,5 +1,6 @@
 from mcp.server.fastmcp import FastMCP
 from langchain_ollama import OllamaEmbeddings
+from langchain_core.runnables import RunnableConfig
 import os
 import httpx
 from vector_data import vector_store
@@ -213,36 +214,47 @@ async def referral_policy(query: str) -> str:
     return await get_cached_or_search(cache_key, search)
 
 @mcp.tool()
-async def timesheet_search(query: str) -> str:
+async def my_timesheet_search(config: RunnableConfig)-> str:
     """
-    Use this tool ONLY when the user asks about:
+    Use this tool ONLY when the user asks about its timesheet details such as:
     - projects
-    - teams
     - timesheets
+    - Upwork Status
+    - Timesheet Status
+    - Timesheet Date
     - tasks
     - time spent
-    - milestones
-    - modules
     - work logs
     - employee work details
 
-    This tool searches timesheet/project information from the vector database.
+    This tool searches timesheet/project information from the given api.
     """
-    cache_key = f"timesheet:{query}"
+    TIMESHEET_API_URL = "https://api.portal.chicmicstudios.in/v1/timesheet/history?index=0&limit=10"
+    
+    headers = {
+        "Authorization": config.get("configurable", {}).get("auth_token"),
+        "Content-Type": "application/json"
+    }
 
-    async def search():
-        docs = vector_store.similarity_search(
-            query,
-            k=2,
-            filter={"type": "timesheet"}
-        )
-        # print(docs)
-        if not docs:
-            return "No relevant information found."
-
-        return "\n\n".join([d.page_content for d in docs])
-
-    return await get_cached_or_search(cache_key, search)
+    async with httpx.AsyncClient() as client:
+        try:
+            response = await client.get(TIMESHEET_API_URL, headers=headers) 
+            if response.status_code == 200:
+                data = response.json()['data']['data']
+                return "\n\n".join([
+                    f"(- Date: {timesheet.get('entryDate')}\n"
+                    f"- Time Spent: {timesheet.get('timeSpent')}\n"
+                    f"- Projects: {timesheet.get('projects')}\n"
+                    f"- Upwork Status: {"Approved" if timesheet.get('upworkStatus')==2 else "Pending"}\n"
+                    f"- Timesheet Status: {"Approved" if timesheet.get('timesheetStatus')==2 else "Pending"}\n"
+                    f"- User Name: {timesheet.get("userName")}\n"
+                    f"- Employee Id: {timesheet.get("employeeId")})\n"
+                    for timesheet in data
+                ])
+            else:
+                return f"Error: Received {response.status_code} from API."
+        except Exception as e:
+            return f"Failed to connect to timesheet API: {str(e)}"
 
 @mcp.tool()
 async def list_holidays(query: str) -> str:
@@ -278,7 +290,6 @@ async def get_user_profile_data(auth_token: str="eyJhbGciOiJIUzI1NiIsInR5cCI6Ikp
     Fetches the current logged-in user's profile details (email, joining date, etc.)
     from the company API using their active Auth Token.
     """
-    # Replace this with your actual existing API endpoint
     PROFILE_API_URL = "https://api.portal.chicmicstudios.in/v1/user?_id=695b6def20ccf734da8d4d0c"
     
     headers = {
