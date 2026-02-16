@@ -72,7 +72,8 @@ async def ask_chatbot(query: str, authorization: str, request_data: dict=Body(de
         config={
             "configurable":{
                 "auth_token": authorization,
-                "request_data": request_data
+                "request_data": request_data,
+                "query": query
             }
         }
     )

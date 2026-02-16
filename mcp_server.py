@@ -369,5 +369,226 @@ async def get_user_leaves(config: RunnableConfig)-> str:
         except Exception as e:
             return f"Failed to connect to the leaves history API: {str(e)}"
 
+@mcp.tool()
+async def get_project_details(config: RunnableConfig) -> str:
+    """
+    Use this tool when user asks about:
+    - project overview
+    - project status
+    - tasks
+    - billing
+    - tracker details
+    - PM time
+    - milestone
+    """
+
+    PROJECT_API_URL = "https://api.portal.chicmicstudios.in/v1/project/list"
+
+    auth_token = config.get("configurable", {}).get("auth_token")
+    user_query = config.get("configurable", {}).get("query", "").lower()
+
+    headers = {
+        "Authorization": auth_token,
+        "Content-Type": "application/json"
+    }
+
+    def seconds_to_hours(seconds):
+        return round(seconds / 3600, 2) if seconds else 0
+
+    async with httpx.AsyncClient() as client:
+        try:
+            response = await client.post(PROJECT_API_URL, headers=headers)
+
+            if response.status_code == 401:
+                return "Unauthorized access. Please login again."
+
+            if response.status_code == 403:
+                return "You are not authorized to access this information."
+
+            if response.status_code != 200:
+                return f"Error: Received {response.status_code} from API."
+
+            project_list = response.json()["data"]["data"]
+
+            # 🔍 Find project mentioned in query
+            selected_project = None
+            for proj in project_list:
+                if proj.get("name", "").lower() in user_query:
+                    selected_project = proj
+                    break
+
+            if not selected_project:
+                return "Project not found or you are not assigned to it."
+
+            # ==========================
+            # 🔹 EXTRACTION FUNCTIONS
+            # ==========================
+
+            def extract_overview(p):
+                return (
+                    f"Project: {p.get('name')}\n"
+                    f"Status: {p.get('statusName')}\n"
+                    f"Client: {p.get('clientName')}\n"
+                    f"Start Date: {p.get('startDate')}\n"
+                    f"End Date: {p.get('endDate')}\n"
+                    f"Next Milestone: {p.get('nextMilestoneName')} "
+                    f"({p.get('nextMilestoneDeliveryDate')})\n"
+                )
+
+            def extract_tasks(p):
+                tasks = p.get("defaultTask", [])
+                if not tasks:
+                    return "No tasks found for this project."
+
+                formatted = []
+                for task in tasks:
+                    formatted.append(
+                        f"Task: {task.get('taskName')}\n"
+                        f"Description: {task.get('description')}\n"
+                        # f"Status: {'Completed' if task.get('status') == 2 else 'Pending'}\n"
+                        f"Time Spent: {seconds_to_hours(task.get('overAllActualTimeInSeconds'))} hrs\n"
+                        f"{'-'*30}"
+                    )
+                return "\n".join(formatted)
+
+            def extract_billing(p):
+                return (
+                    f"Billing Type: {p.get('billingType')}\n"
+                    f"Estimated Cost: {p.get('fixedPriceCurrency')}{p.get('totalEstimatedCost')}\n"
+                    f"Total Paid: {p.get('fixedPriceCurrency')}{p.get('totalPaidAmount')}\n"
+                    f"Quoted Hours: {seconds_to_hours(p.get('quotedTimeInSeconds'))} hrs\n"
+                    f"Billable Hours: {seconds_to_hours(p.get('billableHoursInSeconds'))} hrs\n"
+                )
+
+            def extract_tracker(p):
+                trackers = p.get("allocatedTrackers", [])
+                if not trackers:
+                    return "No trackers allocated."
+
+                formatted = []
+                for tracker in trackers:
+                    users = ", ".join(
+                        [u.get("userName") for u in tracker.get("allocatedUsers", [])]
+                    )
+
+                    formatted.append(
+                        f"Hourly Rate: {tracker.get('hourlyRateValue')}\n"
+                        f"Weekly Cap: {tracker.get('weeklyCap')}\n"
+                        f"Contract URL: {tracker.get('contractUrl')}\n"
+                        f"Allocated Users: {users}\n"
+                        f"{'-'*30}"
+                    )
+                return "\n".join(formatted)
+
+            def extract_pm_time(p):
+                pm_sheet = p.get("pmTimeSheet", [])
+                formatted_pm = []
+
+                for pm in pm_sheet:
+                    formatted_pm.append(
+                        f"{pm.get('userName')} - "
+                        f"{seconds_to_hours(pm.get('overAllActualTimeInSeconds'))} hrs"
+                    )
+
+                return (
+                    f"PM Estimated Time: {seconds_to_hours(p.get('pmEstimatedTimeInSeconds'))} hrs\n"
+                    f"PM Actual Time: {seconds_to_hours(p.get('pmOverallActualTimeInSeconds'))} hrs\n"
+                    f"PM Breakdown:\n" + "\n".join(formatted_pm)
+                )
+
+            # ==========================
+            # 🔹 INTENT BASED RETURN
+            # ==========================
+
+            if "task" in user_query:
+                return extract_tasks(selected_project)
+
+            elif "billing" in user_query or "cost" in user_query:
+                return extract_billing(selected_project)
+
+            elif "tracker" in user_query or "hourly" in user_query:
+                return extract_tracker(selected_project)
+
+            elif "pm" in user_query:
+                return extract_pm_time(selected_project)
+
+            else:
+                return extract_overview(selected_project)
+
+        except Exception as e:
+            return f"Failed to fetch project details: {str(e)}"
+
+
+@mcp.tool()
+async def get_tracker_details(config: RunnableConfig) -> str:
+    """
+    Use this tool when user asks about:
+    - Tracker details
+    - Allocated users in tracker
+    - Project linked to tracker
+    - My trackers (backend filters by token)
+    """
+
+    TRACKER_API_URL = "https://api.portal.chicmicstudios.in/v1/project/trackers/detail"
+
+    auth_token = config.get("configurable", {}).get("auth_token")
+
+    if not auth_token:
+        return "Authorization token is missing."
+
+    headers = {
+        "Authorization": auth_token,
+        "Content-Type": "application/json"
+    }
+
+    async with httpx.AsyncClient(timeout=30.0) as client:
+        try:
+            response = await client.get(TRACKER_API_URL, headers=headers)
+
+            if response.status_code == 401:
+                return "Unauthorized access. Please login again."
+
+            if response.status_code == 403:
+                return "You are not authorized to view tracker details."
+
+            if response.status_code != 200:
+                return f"Error: Received {response.status_code} from API."
+
+            response_json = response.json()
+            tracker_list = response_json.get("data", {}).get("trackerData", [])
+
+            if not tracker_list:
+                return "No tracker data found."
+
+            formatted_output = []
+
+            for tracker in tracker_list:
+                tracker_name = tracker.get("trackerName", "N/A")
+                tracker_email = tracker.get("email", "N/A")
+                tracker_owner = tracker.get("name", "N/A")
+
+                for proj in tracker.get("projectDetail", []):
+                    project_name = proj.get("projectName", "N/A")
+
+                    allocated_users = proj.get("allocatedUsers", [])
+                    user_list = ", ".join(
+                        [u.get("userName", "Unknown") for u in allocated_users]
+                    ) or "No allocated users"
+
+                    formatted_output.append(
+                        f"Tracker Name: {tracker_name}\n"
+                        f"Tracker Owner: {tracker_owner}\n"
+                        f"Email: {tracker_email}\n"
+                        f"Project: {project_name}\n"
+                        f"Allocated Users: {user_list}\n"
+                        f"{'-'*40}"
+                    )
+
+            return "\n".join(formatted_output)
+
+        except Exception as e:
+            return f"Failed to fetch tracker details: {str(e)}"
+
+
 if __name__ == "__main__":
     mcp.run(transport="stdio")
