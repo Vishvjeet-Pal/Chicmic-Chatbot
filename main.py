@@ -7,6 +7,8 @@ from langchain_mcp_adapters.client import MultiServerMCPClient
 from langchain_core.runnables import RunnableConfig
 from langchain_core.tools import BaseTool
 from functools import wraps
+from fastapi.responses import FileResponse
+
 # from langchain_groq import ChatGroq
 from config import settings
 from seed.holidays import HOLIDAYS
@@ -52,7 +54,7 @@ If the user asks ANYTHING related to holidays
    (examples: next holiday, upcoming holidays, holiday list, holiday date, company holidays, leave with holiday, etc.)
    → ALWAYS return the COMPLETE Holiday Calendar provided in the context for user reference.
      Only mention the holidays which are present in the Holiday Calendar document provided in the context. Do NOT generate or assume any holiday information that is not in the document.
-NOTE: Use get_user_profile_data tool if user asks about LEAVE BALANCE
+NOTE: Use get_user_profile_data tool if user asks about LEAVE BALANCE or PROFILE DATA. Provide complete profile data if user asks about its profile data.
 """
 
 agent = None   # global
@@ -103,6 +105,10 @@ async def startup():
         tools=authenticated_tools,
         system_prompt=system_prompt
     )
+
+@app.get("/")
+def serve_index():
+    return FileResponse("index.html")
 
 @app.post("/ask")
 async def ask_chatbot(query: str, Authorization:str=Header(...), request_data: dict=Body(None)):
