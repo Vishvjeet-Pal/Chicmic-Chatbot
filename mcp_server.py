@@ -15,7 +15,7 @@ from tools.timesheet import register_timesheet
 from tools.tracker_details import register_tracker_details
 from tools.user_leaves import register_user_leaves
 from tools.user_profile import register_user_profile
-
+from tools.trainee_course import register_trainee_course
 # import redis.asyncio as redis
 
 # Redis connection
@@ -52,6 +52,7 @@ register_time_spent(mcp)
 register_timesheet(mcp)
 register_tracker_details(mcp)
 register_user_leaves(mcp)
+register_trainee_course(mcp)
 
 embeddings = OllamaEmbeddings(model="nomic-embed-text")
 
