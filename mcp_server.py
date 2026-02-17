@@ -5,7 +5,6 @@ import os
 import httpx
 from vector_data import vector_store
 from datetime import datetime
-
 import redis.asyncio as redis
 
 # Redis connection
@@ -513,5 +512,153 @@ async def get_project_details(auth_token, request_data):
             ])
         except Exception as e:
             return f"Error while connecting to project API: {str(e)}"
+        
+@mcp.tool()
+async def time_spent(auth_token, request_data):
+    """
+    Use this tool when user asks about:
+    - time spent of the day
+    - total time spent in office
+    - total working hours/time in office
+    - my biometric data
+
+    args:
+    - auth_token
+    - request_data
+    """
+
+    TIME_SPENT_API_URL = "https://api.portal.chicmicstudios.in/v1/biometric/time-spent"
+
+    headers = {
+        "Authorization": auth_token,
+        "Content-Type": "application/json"
+    }
+
+    async with httpx.AsyncClient() as client:
+        try:
+            response = await client.post(TIME_SPENT_API_URL, headers=headers, json=request_data)
+
+            if response.status_code == 401:
+                return "Unauthorized access. Please login again."
+
+            if response.status_code == 403:
+                return "You are not authorized to access this information."
+
+            if response.status_code != 200:
+                return f"Error: Received {response.status_code} from API."
+
+            biometric_time = response.json()["data"]
+
+            return "\n\n".join([
+               f"total time spent in work zone is : {biometric_time.get('totalTimeInWorkZone')}\n"
+               f"total time spent in office is :{biometric_time.get('totalTimeInOffice')}\n"
+            ])
+
+        except Exception as e:
+            return f"Error while connecting to time spent API: {str(e)}"
+
+@mcp.tool()
+async def get_daily_attendence(auth_token):
+    """
+    This tool provides daily timesheet and attendance details of a user.
+
+Use this tool when the user asks about:
+- Daily attendance
+- In-time or out-time
+- Total working hours
+- Time spent in office or work zone
+- Work from home status
+- Holiday status
+- Leaves deducted
+- Timesheet status
+- Upwork status
+- Guard in/out time
+
+    args:
+    - auth_token
+    """
+    DAILY_ATTENDENCE_API_URL = "https://api.portal.chicmicstudios.in/v1/timesheet/in/out?month=1&year=2026&userId=695c9a8520ccf734da9412a0"
+
+    headers = {
+        "Authorization": auth_token,
+        "Content-Type": "application/json"
+    }
+
+    async with httpx.AsyncClient() as client:
+        try:
+            response = await client.get(DAILY_ATTENDENCE_API_URL, headers=headers)
+
+            if response.status_code == 401:
+                return "Unauthorized access. Please login again."
+
+            if response.status_code == 403:
+                return "You are not authorized to access this information."
+
+            if response.status_code != 200:
+                return f"Error: Received {response.status_code} from API."
+
+            attendance_data = response.json()["data"]["data"]["stats"]
+
+            return "\n\n".join([
+               f"Day: {attendance.get('day')}\n"
+               f"In Time: {attendance.get('inTime')}\n"
+               f"Out Time: {attendance.get('outTime')}\n"
+               f"Date: {attendance.get('date')}\n"
+               f"is it work from home: {attendance.get('isWfh')}\n"
+               f"is it holiday: {attendance.get('isHoliday')}\n"
+               f"leaves deducted on that day: {attendance.get('leavesDeducted')}\n"
+               f"guard in time: {attendance.get('guardInTime')}\n"
+               f"guard out time: {attendance.get('guardOutTime')}\n"
+               f" timesheet time : {attendance.get('timeSheetTime')}\n"
+               f" total time spent in office is : {attendance.get('totalTimeInOffice')}\n"
+               f"total time spent in work zoon is :{attendance.get('totalTimeInWorkZone')}\n"
+               f"timesheet status:  {'Approved' if attendance.get('timesheetStatus')==2 else 'Pending'}\n"
+               f"upwork status:  {'Approved' if attendance.get('upworkStatus')==2 else 'Pending'}\n"
+            for attendance in attendance_data])
+
+        except Exception as e:
+            return f"Error while connecting to daily attendence API: {str(e)}"
+        
+
+@mcp.tool()
+async def punch_in_out(auth_token, request_data):
+
+    """
+    Use this tool when the user asks about:
+- Punch in or punch out time
+- Device punch records
+- From which device or floor the punch was recorded
+- Direction of punch (IN / OUT)
+
+args:
+- auth_token
+- request_data
+    """
+
+    PUNCH_IN_OUT_URL="https://api.portal.chicmicstudios.in/v1/biometric/punches"
+
+    headers = {
+        "Authorization": auth_token,
+        "Content-Type": "application/json"
+      }
+
+    async with httpx.AsyncClient() as client:
+        try:
+          response = await client.post(PUNCH_IN_OUT_URL, headers=headers, json=request_data)
+        
+          punch_data = response.json()["data"]
+
+          return "\n\n".join([
+            f"Punch Month is: { datetime.fromisoformat(punch.get('punchMonth').replace('Z', '+00:00')).strftime('%B')}\n"
+            f"punched {punch.get('devDirection')} on date : {punch.get('attPunchDownDate')}\n"
+            f"punch device name is : {punch.get('deviceName')}\n"
+            
+            for punch in punch_data
+          ])
+          
+        except Exception as e:
+          return f"Error while connecting to punch in/out API: {str(e)}"
+               
+
 if __name__ == "__main__":
     mcp.run(transport="stdio")
