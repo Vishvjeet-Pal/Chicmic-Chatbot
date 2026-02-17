@@ -477,15 +477,15 @@
   </head>
   <body>
     <!-- Login Page -->
-    <!-- <div class="login-page" id="loginPage">
+    <div class="login-page" id="loginPage">
       <div class="login-header">
         <h1>🤖 HR Assistant</h1>
         <p>Chicmic Studios</p>
       </div>
 
       <div class="alert error" id="loginError"></div>
-      <div class="alert success" id="loginSuccess"></div> -->
-    <!-- 
+      <div class="alert success" id="loginSuccess"></div> 
+    
       <form id="loginForm" onsubmit="handleLogin(event)">
         <div class="form-group">
           <label for="username">Login ID</label>
@@ -496,9 +496,9 @@
             value="CMS/2026/830"
             required
           />
-        </div> -->
+        </div> 
 
-    <!-- <div class="form-group">
+     <div class="form-group">
           <label for="password">Password</label>
           <input
             type="password"
@@ -510,9 +510,9 @@
         </div>
 
         <button type="submit" class="btn-login" id="loginBtn">Login</button>
-      </form> -->
+      </form>
 
-    <!-- <p
+    <p
         style="
           text-align: center;
           margin-top: 24px;
@@ -522,7 +522,7 @@
       >
         Credentials are pre-filled. Click Login to proceed.
       </p>
-    </div> -->
+    </div>
 
     <!-- Chat Page -->
     <div class="chat-page" id="chatPage">
@@ -593,7 +593,7 @@
     <script>
       // Configuration
       const CONFIG = {
-        API_URL: "http://localhost:8000",
+        API_URL: "https://nlrqktpt-8000.inc1.devtunnels.ms",
         RECONNECT_ATTEMPTS: 3,
         RECONNECT_DELAY: 1000,
       };
@@ -620,9 +620,9 @@
       }
 
       function escapeHtml(text) {
-        const div = document.createElement("div");
-        div.textContent = text;
-        return div.innerHTML;
+        const pre = document.createElement("pre");
+        pre.textContent = text;
+        return pre.innerHTML;
       }
 
       function formatTime(date) {
@@ -658,88 +658,88 @@
       }
 
       // Authentication
-      // async function handleLogin(event) {
-      //   event.preventDefault();
+      async function handleLogin(event) {
+        event.preventDefault();
 
-      //   const username = document.getElementById("username").value.trim();
-      //   const password = document.getElementById("password").value.trim();
-      //   const loginBtn = document.getElementById("loginBtn");
+        const username = document.getElementById("username").value.trim();
+        const password = document.getElementById("password").value.trim();
+        const loginBtn = document.getElementById("loginBtn");
 
-      //   if (!username || !password) {
-      //     showAlert(
-      //       "error",
-      //       "loginError",
-      //       "Please enter both username and password",
-      //     );
-      //     return;
-      //   }
+        if (!username || !password) {
+          showAlert(
+            "error",
+            "loginError",
+            "Please enter both username and password",
+          );
+          return;
+        }
 
-      //   loginBtn.disabled = true;
-      //   loginBtn.textContent = "Logging in...";
+        loginBtn.disabled = true;
+        loginBtn.textContent = "Logging in...";
 
-      //   try {
-      //     // Create Bearer token
-      //     state.authToken = `Bearer ${btoa(username + ":" + password)}`;
-      //     state.userId = username;
+        try {
+          // Create Bearer token
+          state.authToken = `Bearer ${btoa(username + ":" + password)}`;
+          state.userId = username;
 
-      //     // Test connection to backend
-      //     const response = await fetch(`${CONFIG.API_URL}/holidays`, {
-      //       headers: {
-      //         Authorization: state.authToken,
-      //       },
-      //     });
+          // Test connection to backend
+          const response = await fetch(`${CONFIG.API_URL}/holidays`, {
+            headers: {
+              Authorization: state.authToken,
+            },
+          });
 
-      //     if (response.ok) {
-      //       saveSession();
-      //       showAlert(
-      //         "success",
-      //         "loginSuccess",
-      //         "Login successful! Redirecting...",
-      //       );
+          if (response.ok) {
+            saveSession();
+            showAlert(
+              "success",
+              "loginSuccess",
+              "Login successful! Redirecting...",
+            );
 
-      //       setTimeout(() => {
-      //         showLoginPage(false);
-      //         showChatPage(true);
-      //         initializeChat();
-      //       }, 500);
-      //     } else {
-      //       throw new Error(`Backend error: ${response.status}`);
-      //     }
-      //   } catch (error) {
-      //     console.error("Login error:", error);
-      //     showAlert(
-      //       "error",
-      //       "loginError",
-      //       `Login failed: ${error.message}. Make sure backend is running at ${CONFIG.API_URL}`,
-      //     );
-      //     state.authToken = null;
-      //     state.userId = null;
-      //   } finally {
-      //     loginBtn.disabled = false;
-      //     loginBtn.textContent = "Login";
-      //   }
-      // }
+            setTimeout(() => {
+              showLoginPage(false);
+              showChatPage(true);
+              initializeChat();
+            }, 500);
+          } else {
+            throw new Error(`Backend error: ${response.status}`);
+          }
+        } catch (error) {
+          console.error("Login error:", error);
+          showAlert(
+            "error",
+            "loginError",
+            `Login failed: ${error.message}. Make sure backend is running at ${CONFIG.API_URL}`,
+          );
+          state.authToken = null;
+          state.userId = null;
+        } finally {
+          loginBtn.disabled = false;
+          loginBtn.textContent = "Login";
+        }
+      }
 
-      // function handleLogout() {
-      //   if (confirm("Are you sure you want to logout?")) {
-      //     clearSession();
-      //     state.conversation = [];
-      //     showChatPage(false);
-      //     showLoginPage(true);
-      //     document.getElementById("messagesContainer").innerHTML = `
-      //               <div class="empty-state">
-      //                   <div class="empty-state-icon">💬</div>
-      //                   <p>Start chatting to get information about your profile, leaves, timesheets, and more!</p>
-      //               </div>
-      //           `;
-      //     document.getElementById("messageInput").value = "";
-      //   }
-      // }
+      function handleLogout() {
+        if (confirm("Are you sure you want to logout?")) {
+          clearSession();
+          state.conversation = [];
+          showChatPage(false);
+          showLoginPage(true);
+          document.getElementById("messagesContainer").innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">💬</div>
+                        <p>Start chatting to get information about your profile, leaves, timesheets, and more!</p>
+                    </div>
+                `;
+          document.getElementById("messageInput").value = "";
+        }
+      }
 
       // UI Helpers
-      // function showLoginPage(show = true) {
-      //   document.getElementById("loginPage").classList.toggle("hidden", !show);
-      // }
+      function showLoginPage(show = true) {
+        document.getElementById("loginPage").classList.toggle("hidden", !show);
+      }
 
       function showChatPage(show = true) {
         document.getElementById("chatPage").classList.toggle("hidden", !show);
@@ -787,7 +787,7 @@
         const time = formatTime(new Date());
         messageDiv.innerHTML = `
                 <div class="message-wrapper">
-                    <div class="message-content">${escapeHtml(text)}</div>
+                    <pre class="message-content">${escapeHtml(text)}</pre>
                     <div class="message-time">${time}</div>
                 </div>
             `;
@@ -847,7 +847,7 @@
 
         try {
           // Build dynamic request data based on query
-          const requestData = buildRequestData(message);
+          const requestData = buildRequestData();
 
           const response = await fetch(
             `${CONFIG.API_URL}/ask?query=${encodeURIComponent(message)}`,
@@ -855,7 +855,7 @@
               method: "POST",
               headers: {
                 Authorization:
-                  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2OTVjOWE4NTIwY2NmNzM0ZGE5NDEyYTAiLCJ0aW1lIjoxNzcxMjE1NTQ1NzEzLCJpYXQiOjE3NzEyMTU1NDUsImV4cCI6MTc3MzgwNzU0NX0.aJJa2B2ZkLqFnjoC8DobjNiMJCFzQS2tOCrFbWXWQF0",
+                  localStorage.getItem('token'),
                 "Content-Type": "application/json",
               },
               body: JSON.stringify(requestData),
@@ -893,33 +893,33 @@
         }
       }
 
-      function buildRequestData(query) {
-        const lowerQuery = query.toLowerCase();
+      function buildRequestData() {
         const now = new Date();
         const data = {
-          userId: state.userId,
-          timestamp: now.toISOString(),
-          loginId: state.userId,
+          _id: localStorage.getItem('_id'),
+          date: "2026-02-17",
+          empId: localStorage.getItem('empId'),
+          billingType:"1"
         };
 
         // Add leave-specific parameters
-        if (lowerQuery.includes("leave") || lowerQuery.includes("vacation")) {
-          data.fromDate = new Date(now.getFullYear(), 0, 1).toISOString();
-          data.toDate = now.toISOString();
-        }
+        // if (lowerQuery.includes("leave") || lowerQuery.includes("vacation")) {
+        //   data.fromDate = new Date(now.getFullYear(), 0, 1).toISOString();
+        //   data.toDate = now.toISOString();
+        // }
 
-        // Add project-specific parameters
-        if (lowerQuery.includes("project") || lowerQuery.includes("task")) {
-          data.page = 0;
-          data.limit = 10;
-          data.filter = "all";
-        }
+        // // Add project-specific parameters
+        // if (lowerQuery.includes("project") || lowerQuery.includes("task")) {
+        //   data.page = 0;
+        //   data.limit = 10;
+        //   data.filter = "all";
+        // }
 
-        // Add timesheet-specific parameters
-        if (lowerQuery.includes("timesheet") || lowerQuery.includes("work")) {
-          data.index = 0;
-          data.limit = 10;
-        }
+        // // Add timesheet-specific parameters
+        // if (lowerQuery.includes("timesheet") || lowerQuery.includes("work")) {
+        //   data.index = 0;
+        //   data.limit = 10;
+        // }
 
         return data;
       }
