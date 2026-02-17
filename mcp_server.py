@@ -290,7 +290,7 @@ async def list_holidays(query: str) -> str:
 @mcp.tool()
 async def get_user_profile_data(auth_token: str):
     """
-    Fetches the current logged-in user's profile details such as:
+    Provide the current logged-in user's profile details such as:
     - My Name
     - My email
     - My joining data
@@ -481,8 +481,6 @@ async def get_project_details(auth_token, request_data):
         "Content-Type": "application/json"
     }
 
-    def seconds_to_hours(seconds):
-        return round(seconds / 3600, 2) if seconds else 0
 
     async with httpx.AsyncClient() as client:
         try:
