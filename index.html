@@ -477,15 +477,15 @@
   </head>
   <body>
     <!-- Login Page -->
-    <div class="login-page" id="loginPage">
+    <!-- <div class="login-page" id="loginPage">
       <div class="login-header">
         <h1>🤖 HR Assistant</h1>
         <p>Chicmic Studios</p>
       </div>
 
       <div class="alert error" id="loginError"></div>
-      <div class="alert success" id="loginSuccess"></div>
-
+      <div class="alert success" id="loginSuccess"></div> -->
+    <!-- 
       <form id="loginForm" onsubmit="handleLogin(event)">
         <div class="form-group">
           <label for="username">Login ID</label>
@@ -496,9 +496,9 @@
             value="CMS/2026/830"
             required
           />
-        </div>
+        </div> -->
 
-        <div class="form-group">
+    <!-- <div class="form-group">
           <label for="password">Password</label>
           <input
             type="password"
@@ -510,9 +510,9 @@
         </div>
 
         <button type="submit" class="btn-login" id="loginBtn">Login</button>
-      </form>
+      </form> -->
 
-      <p
+    <!-- <p
         style="
           text-align: center;
           margin-top: 24px;
@@ -522,7 +522,7 @@
       >
         Credentials are pre-filled. Click Login to proceed.
       </p>
-    </div>
+    </div> -->
 
     <!-- Chat Page -->
     <div class="chat-page" id="chatPage">
@@ -658,88 +658,88 @@
       }
 
       // Authentication
-      async function handleLogin(event) {
-        event.preventDefault();
+      // async function handleLogin(event) {
+      //   event.preventDefault();
 
-        const username = document.getElementById("username").value.trim();
-        const password = document.getElementById("password").value.trim();
-        const loginBtn = document.getElementById("loginBtn");
+      //   const username = document.getElementById("username").value.trim();
+      //   const password = document.getElementById("password").value.trim();
+      //   const loginBtn = document.getElementById("loginBtn");
 
-        if (!username || !password) {
-          showAlert(
-            "error",
-            "loginError",
-            "Please enter both username and password",
-          );
-          return;
-        }
+      //   if (!username || !password) {
+      //     showAlert(
+      //       "error",
+      //       "loginError",
+      //       "Please enter both username and password",
+      //     );
+      //     return;
+      //   }
 
-        loginBtn.disabled = true;
-        loginBtn.textContent = "Logging in...";
+      //   loginBtn.disabled = true;
+      //   loginBtn.textContent = "Logging in...";
 
-        try {
-          // Create Bearer token
-          state.authToken = `Bearer ${btoa(username + ":" + password)}`;
-          state.userId = username;
+      //   try {
+      //     // Create Bearer token
+      //     state.authToken = `Bearer ${btoa(username + ":" + password)}`;
+      //     state.userId = username;
 
-          // Test connection to backend
-          const response = await fetch(`${CONFIG.API_URL}/holidays`, {
-            headers: {
-              Authorization: state.authToken,
-            },
-          });
+      //     // Test connection to backend
+      //     const response = await fetch(`${CONFIG.API_URL}/holidays`, {
+      //       headers: {
+      //         Authorization: state.authToken,
+      //       },
+      //     });
 
-          if (response.ok) {
-            saveSession();
-            showAlert(
-              "success",
-              "loginSuccess",
-              "Login successful! Redirecting...",
-            );
+      //     if (response.ok) {
+      //       saveSession();
+      //       showAlert(
+      //         "success",
+      //         "loginSuccess",
+      //         "Login successful! Redirecting...",
+      //       );
 
-            setTimeout(() => {
-              showLoginPage(false);
-              showChatPage(true);
-              initializeChat();
-            }, 500);
-          } else {
-            throw new Error(`Backend error: ${response.status}`);
-          }
-        } catch (error) {
-          console.error("Login error:", error);
-          showAlert(
-            "error",
-            "loginError",
-            `Login failed: ${error.message}. Make sure backend is running at ${CONFIG.API_URL}`,
-          );
-          state.authToken = null;
-          state.userId = null;
-        } finally {
-          loginBtn.disabled = false;
-          loginBtn.textContent = "Login";
-        }
-      }
+      //       setTimeout(() => {
+      //         showLoginPage(false);
+      //         showChatPage(true);
+      //         initializeChat();
+      //       }, 500);
+      //     } else {
+      //       throw new Error(`Backend error: ${response.status}`);
+      //     }
+      //   } catch (error) {
+      //     console.error("Login error:", error);
+      //     showAlert(
+      //       "error",
+      //       "loginError",
+      //       `Login failed: ${error.message}. Make sure backend is running at ${CONFIG.API_URL}`,
+      //     );
+      //     state.authToken = null;
+      //     state.userId = null;
+      //   } finally {
+      //     loginBtn.disabled = false;
+      //     loginBtn.textContent = "Login";
+      //   }
+      // }
 
-      function handleLogout() {
-        if (confirm("Are you sure you want to logout?")) {
-          clearSession();
-          state.conversation = [];
-          showChatPage(false);
-          showLoginPage(true);
-          document.getElementById("messagesContainer").innerHTML = `
-                    <div class="empty-state">
-                        <div class="empty-state-icon">💬</div>
-                        <p>Start chatting to get information about your profile, leaves, timesheets, and more!</p>
-                    </div>
-                `;
-          document.getElementById("messageInput").value = "";
-        }
-      }
+      // function handleLogout() {
+      //   if (confirm("Are you sure you want to logout?")) {
+      //     clearSession();
+      //     state.conversation = [];
+      //     showChatPage(false);
+      //     showLoginPage(true);
+      //     document.getElementById("messagesContainer").innerHTML = `
+      //               <div class="empty-state">
+      //                   <div class="empty-state-icon">💬</div>
+      //                   <p>Start chatting to get information about your profile, leaves, timesheets, and more!</p>
+      //               </div>
+      //           `;
+      //     document.getElementById("messageInput").value = "";
+      //   }
+      // }
 
       // UI Helpers
-      function showLoginPage(show = true) {
-        document.getElementById("loginPage").classList.toggle("hidden", !show);
-      }
+      // function showLoginPage(show = true) {
+      //   document.getElementById("loginPage").classList.toggle("hidden", !show);
+      // }
 
       function showChatPage(show = true) {
         document.getElementById("chatPage").classList.toggle("hidden", !show);
@@ -854,7 +854,8 @@
             {
               method: "POST",
               headers: {
-                Authorization: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2OTViNmRlZjIwY2NmNzM0ZGE4ZDRkMGMiLCJ0aW1lIjoxNzcxMjI1OTkxNjk0LCJpYXQiOjE3NzEyMjU5OTEsImV4cCI6MTc3MzgxNzk5MX0.H1RvQdPX00yfhgBehz1-TC_0T9g7M-9n8yGeGzd60b0",
+                Authorization:
+                  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2OTVjOWE4NTIwY2NmNzM0ZGE5NDEyYTAiLCJ0aW1lIjoxNzcxMjE1NTQ1NzEzLCJpYXQiOjE3NzEyMTU1NDUsImV4cCI6MTc3MzgwNzU0NX0.aJJa2B2ZkLqFnjoC8DobjNiMJCFzQS2tOCrFbWXWQF0",
                 "Content-Type": "application/json",
               },
               body: JSON.stringify(requestData),
