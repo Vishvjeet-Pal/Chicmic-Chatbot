@@ -3,7 +3,7 @@ from datetime import datetime
 
 def register_punch_tool(mcp):
   @mcp.tool()
-  async def punch_in_out(auth_token, request_data):
+  async def punch_in_out(auth_token, request_data, date):
 
       """
       Use this tool when the user asks about:
@@ -15,6 +15,7 @@ def register_punch_tool(mcp):
   args:
   - auth_token
   - request_data
+  - date: provided by user in the query
       """
 
       PUNCH_IN_OUT_URL="https://api.portal.chicmicstudios.in/v1/biometric/punches"
@@ -26,7 +27,7 @@ def register_punch_tool(mcp):
 
       async with httpx.AsyncClient() as client:
           try:
-            response = await client.post(PUNCH_IN_OUT_URL, headers=headers, json={"date":request_data['date'],"empId":request_data['empId']})
+            response = await client.post(PUNCH_IN_OUT_URL, headers=headers, json={"date":date,"empId":request_data['empId']})
           
             punch_data = response.json()["data"]
 
