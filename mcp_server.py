@@ -17,6 +17,7 @@ from tools.user_leaves import register_user_leaves
 from tools.user_profile import register_user_profile
 from tools.trainee_course import register_trainee_course
 from tools.event_history import register_event_history
+from tools.leave_application import register_leave_application
 # import redis.asyncio as redis
 
 # Redis connection
@@ -55,6 +56,7 @@ register_tracker_details(mcp)
 register_user_leaves(mcp)
 register_trainee_course(mcp)
 register_event_history(mcp)
+register_leave_application(mcp)
 
 embeddings = OllamaEmbeddings(model="nomic-embed-text")
 
