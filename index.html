@@ -683,7 +683,7 @@
           state.userId = username;
 
           // Test connection to backend
-          const response = await fetch(`${CONFIG.API_URL}/holidays`, {
+          const response = await fetch(`/holidays`, {
             headers: {
               Authorization: state.authToken,
             },
@@ -850,7 +850,7 @@
           const requestData = buildRequestData();
 
           const response = await fetch(
-            `${CONFIG.API_URL}/ask?query=${encodeURIComponent(message)}`,
+            `/ask?query=${encodeURIComponent(message)}`,
             {
               method: "POST",
               headers: {
@@ -897,7 +897,7 @@
         const now = new Date();
         const data = {
           _id: localStorage.getItem('_id'),
-          date: "2026-02-17",
+          date: "2026-02-19",
           empId: localStorage.getItem('empId'),
           billingType:"1",
           index: 0,

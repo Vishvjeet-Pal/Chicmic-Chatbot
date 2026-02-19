@@ -11,7 +11,7 @@ def register_holidays(mcp,vector_store):
     - Leave planning with holidays
     This tool searches holidays calendar from the vector database.
     """
-        cache_key = f"holiday:{query}"
+        cache_key = f"holiday"
 
         async def search():
             docs = vector_store.similarity_search(
