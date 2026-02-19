@@ -18,6 +18,32 @@ from tools.user_profile import register_user_profile
 from tools.trainee_course import register_trainee_course
 from tools.event_history import register_event_history
 from tools.leave_application import register_leave_application
+from tools.expense import register_expense_tool
+from tools.learningRD import register_learning_tool
+from tools.meeting_task import register_meeting_tool
+from tools.it_task import register_it_task_tool
+from tools.presentation import register_presentation_tool
+# import redis.asyncio as redis
+
+# Redis connection
+# redis_client = redis.Redis(
+#     host="localhost",
+#     port=6379,
+#     decode_responses=True,
+#     max_connections=10
+# )
+
+# async def get_cached_or_search(cache_key, search_fn, ttl=300):
+
+#     cached = await redis_client.get(cache_key)
+#     if cached:
+#         return f"(cached)\n{cached}"
+
+
+#     result = await search_fn()
+
+#     await redis_client.set(cache_key, result, ex=ttl)
+#     return result
 
 
 mcp = FastMCP("Company Assistant")
@@ -36,7 +62,11 @@ register_user_leaves(mcp)
 register_trainee_course(mcp)
 register_event_history(mcp)
 register_leave_application(mcp)
-
+register_expense_tool(mcp)
+register_learning_tool(mcp)
+register_meeting_tool(mcp)
+register_it_task_tool(mcp)
+register_presentation_tool(mcp)
 embeddings = OllamaEmbeddings(model="nomic-embed-text")
                
 

@@ -3,7 +3,7 @@ from datetime import datetime, timezone, timedelta
 
 def register_attendance(mcp):
     @mcp.tool()
-    async def get_daily_attendence(auth_token, request_data):
+    async def get_daily_attendence(auth_token,request_data):
         """
     This tool provides daily timesheet and attendance details of a user.
 
@@ -23,7 +23,7 @@ Use this tool when the user asks about:
     - auth_token
     - request_data
     """
-        DAILY_ATTENDENCE_API_URL = f"https://api.portal.chicmicstudios.in/v1/timesheet/in/out?month=1&year=2026&userId={request_data}"
+        DAILY_ATTENDENCE_API_URL = f"https://api.portal.chicmicstudios.in/v1/timesheet/in/out?month=1&year=2026&userId={request_data['_id']}"
 
         headers = {
         "Authorization": auth_token,
