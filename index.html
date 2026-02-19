@@ -484,8 +484,8 @@
       </div>
 
       <div class="alert error" id="loginError"></div>
-      <div class="alert success" id="loginSuccess"></div> 
-    
+      <div class="alert success" id="loginSuccess"></div>
+
       <form id="loginForm" onsubmit="handleLogin(event)">
         <div class="form-group">
           <label for="username">Login ID</label>
@@ -496,9 +496,9 @@
             value="CMS/2026/830"
             required
           />
-        </div> 
+        </div>
 
-     <div class="form-group">
+        <div class="form-group">
           <label for="password">Password</label>
           <input
             type="password"
@@ -512,7 +512,7 @@
         <button type="submit" class="btn-login" id="loginBtn">Login</button>
       </form>
 
-    <p
+      <p
         style="
           text-align: center;
           margin-top: 24px;
@@ -854,8 +854,7 @@
             {
               method: "POST",
               headers: {
-                Authorization:
-                  localStorage.getItem('token'),
+                Authorization: localStorage.getItem("token"),
                 "Content-Type": "application/json",
               },
               body: JSON.stringify(requestData),
@@ -896,12 +895,12 @@
       function buildRequestData() {
         const now = new Date();
         const data = {
-          _id: localStorage.getItem('_id'),
-          date: "2026-02-17",
-          empId: localStorage.getItem('empId'),
-          billingType:"1",
+          _id: localStorage.getItem("_id"),
+          date: "2026-02-19",
+          empId: localStorage.getItem("empId"),
+          billingType: "1",
           index: 0,
-          limit: 10
+          limit: 10,
         };
 
         // Add leave-specific parameters
