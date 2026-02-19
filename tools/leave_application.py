@@ -49,7 +49,7 @@ The tool returns formatted leave application data containing:
             
         async with httpx.AsyncClient() as client:
             try:
-                response = await client.post(LEAVE_APPLICATION_API_URL, headers=headers, json=request_data)
+                response = await client.post(LEAVE_APPLICATION_API_URL, headers=headers, json={"index":request_data["index"],"limit":request_data["limit"]})
 
                 if response.status_code == 401:
                     return "Unauthorized access. Please login again."

@@ -10,7 +10,7 @@ from functools import wraps
 from fastapi.responses import FileResponse
 
 # from langchain_groq import ChatGroq
-from config import settings
+# from config import settings
 from seed.holidays import HOLIDAYS
 # from ingest.holiday_ingest import ingest_holidays_from_api
 from seed.timesheets import timesheets
@@ -21,12 +21,13 @@ from fastapi.middleware.cors import CORSMiddleware
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Allow all origins for development
+    allow_origins=["*"],  
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
-llm = ChatOllama(model="llama3.1", temperature=0)
+llm = ChatOllama(model="llama3.1", temperature=1,base_url="http://192.180.5.31:11434")
+# llm = ChatOllama(model="qwen2.5:7b", temperature=0,base_url="http://192.180.5.31:11434")
 # llm = ChatGroq(model="llama-3.3-70b-versatile", temperature=0, api_key=settings.GROQ_API_KEY)
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -45,11 +46,16 @@ async def get_mcp_tools():
 
 
 system_prompt = """You are a Chatbot Assistant of "Chicmic Studios" company. Use tools to query the DB. Answer user queries based on the retrieved information. If you don't know the answer, say you don't know. ONLY answer what is asked. DO NOT provide extra information. If you are not sure which tool to use, use search_pdf_policy tool first to check if the answer is in the FAQs.
-If you can not decide which tool to use, say you don't know
+IMPORTANT INSTRUCTION: 
+- IF YOU CAN NOT DECIDE WHICH TOOL TO USE, SAY "I don't know".
+- NEVER return internal json data to user. 
+- If date is mentioned but year is not mentioned in user's query, DO NOT ASSUME year. Just provide date without year.
 After receiving tool results, you MUST return the final answer to the user.
 Do NOT call tools again if the answer is found.
 Return ONLY the final answer text.
 DO NOT mention the tools used.
+STRICT RULES:
+    - IF NO YEAR IS MENTIONED IN DATE, DO NOT ASSUME THE YEAR.
 If the user asks ANYTHING related to holidays
    (examples: next holiday, upcoming holidays, holiday list, holiday date, company holidays, leave with holiday, etc.)
    → ALWAYS return the COMPLETE Holiday Calendar provided in the context for user reference.
@@ -111,7 +117,7 @@ async def startup():
     agent = create_agent(
         model=llm,
         tools=authenticated_tools,
-        system_prompt=system_prompt
+        system_prompt=system_prompt,
     )
 
 @app.get("/")
