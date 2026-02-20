@@ -6,12 +6,12 @@ def register_time_spent(mcp):
     @mcp.tool()
     async def time_spent(auth_token, request_data, date):
         """
-        Use this tool when user asks about:
+        Use this tool when user asks ONLY about:
         - time spent of the day
         - time spent in office/company
         - total working hours/time in office
         - my biometric data
-
+        Note: This tool DOES NOT provide the office timings of the user.  Office timing is different from the time spent by user in the office.
         args:
         - auth_token
         - request_data

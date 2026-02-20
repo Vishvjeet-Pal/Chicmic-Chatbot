@@ -61,14 +61,6 @@ If the user asks ANYTHING related to holidays
    → ALWAYS return the COMPLETE Holiday Calendar provided in the context for user reference.
      Only mention the holidays which are present in the Holiday Calendar document provided in the context. Do NOT generate or assume any holiday information that is not in the document.
 NOTE: Use get_user_profile_data tool if user asks about LEAVE BALANCE or PROFILE DATA. Provide complete profile data if user asks about its profile data.
-When the user mentions a date, extract it in ISO format (YYYY-MM-DD).
-
-If no date is mentioned, return today's date.
-Return output strictly in this JSON format:
-
-{
-  "date": "YYYY-MM-DD"
-}
 """
 
 agent = None   # global

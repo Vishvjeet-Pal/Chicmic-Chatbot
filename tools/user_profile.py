@@ -5,7 +5,8 @@ def register_user_profile(mcp):
     @mcp.tool()
     async def get_user_profile_data(auth_token: str, request_data):
         """
-        Provide the current logged-in user's profile details such as:
+        Provide the current logged-in user's profile/personal and official details such as:
+        - AT WHAT TIME SHOULD I COME TO OFFICE
         - My Name
         - My email
         - My joining data
@@ -14,7 +15,7 @@ def register_user_profile(mcp):
         - My teams
         - My leave Balance
         - My role
-        - My shift/office timing
+        - MY SHIFT/OFFICE TIMING
 
         Args:
             - auth_token: The system authentication token.
@@ -27,7 +28,7 @@ def register_user_profile(mcp):
         async def search():
             PROFILE_API_URL = f"https://api.portal.chicmicstudios.in/v1/user?_id={request_data['_id']}"
             headers = {
-                "Authorization": auth_token, #config.get("configurable",{}).get("auth_token",""),
+                "Authorization": auth_token, 
                 "Content-Type": "application/json"
             }
             async with httpx.AsyncClient() as client:
@@ -53,4 +54,4 @@ def register_user_profile(mcp):
                         return f"Error: Received {response.status_code} from API."
                 except Exception as e:
                     return f"Failed to connect to profile API: {str(e)}"
-        return await get_cached_or_search(cache_key, search,ttl=7*3600)
+        return await get_cached_or_search(cache_key, search,ttl=3*3600)

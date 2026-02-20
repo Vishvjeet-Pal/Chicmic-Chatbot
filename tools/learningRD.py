@@ -6,14 +6,17 @@ def register_learning_tool(mcp):
     @mcp.tool()
     async def get_learning_details(auth_token):
         """
-        Use this tool when the user asks about:
-
+        STRICT RULES:
+        - Use this tool ONLY when the user asks about LEARNING and R&D TASKS.
+        - NEVER use this tool if learning and R&D is not mentioned in user's query.
+        
+        This tool provides:
         - leraning and r&d Task details
         - leraning and r&d Task status
         - Assigned employees to leraning and r&d tasks
         - Employee leraning and r&d task progress
         - Pending / Completed leraning and r&d task list
-        - Time spent on leraning and r&d tasks
+        - Time spent on learning and r&d tasks
 
         args:
         - auth_token

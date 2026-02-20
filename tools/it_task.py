@@ -6,6 +6,10 @@ def register_it_task_tool(mcp):
     @mcp.tool()
     async def it_task_schedule(auth_token):
         """
+        STRICT RULES:
+        - Use this tool ONLY when the user asks about IT TASKS.
+        - NEVER use this tool if IT tasks is not mentioned in user's query.
+
         Use this tool when the user asks about:
         - Assigned IT tasks
         - IT Task schedule

@@ -58,7 +58,7 @@ def register_event_history(mcp):
                 event_history_data = response.json().get("data", {}).get("data", [])
 
                 return "\n\n".join([
-                    f"(You({request_data['name']}) participated in Event Name: {event.get('eventName')}\n"
+                    f"(You({request_data['name']}) participated in {event.get('eventName')}\n"
                     f"Event Date: {event.get('date')}\n"
                     f"Duration: {event.get('duration')}\n"
                     f"Description: {event.get('description')}\n"
