@@ -43,11 +43,11 @@ def register_user_leaves(mcp):
                         f"(Leave Reason/Comment: {leave.get('reason')}\n"
                         f"Date: {leave.get('fromDate')} to {leave.get('toDate')}\n"
                         f"The leave is taken in {(datetime.strptime(leave.get('fromDate'), '%Y-%m-%dT%H:%M:%S.%fZ')).strftime('%B')} month\n"
-                        f"Status: {'Pending' if leave.get('status')==1 else 'Approved'}\n"
+                        f"Status: This leave is {'Pending' if leave.get('status')==1 else 'Approved'}\n"
                         f"Leave application is sent to {[manager.get('name') for manager in leave.get('sendTo')]}\n"
                         f"Duration of the leave is {leave.get('totalDays')}\n"
                         f"Leave Type: {leave.get('leaveType')} -> {leave.get('leaveReasonName')}\n"
-                        f"Is sandwich applied: {'Yes' if leave.get('isSandwichApplied') else 'No'})\n"
+                        f"Is sandwich applied on this leave: {'Yes' if leave.get('isSandwichApplied') else 'No'})\n"
                         for leave in data
                         ])
                     else:

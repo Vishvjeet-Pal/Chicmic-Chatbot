@@ -894,33 +894,16 @@
 
       function buildRequestData() {
         const now = new Date();
+        const formattedDate = now.toISOString().split('T')[0];
+
         const data = {
           _id: localStorage.getItem('_id'),
-          date: "2026-02-19",
+          date: formattedDate,
           empId: localStorage.getItem('empId'),
-          billingType:"1",
+          billingType: "1",
           index: 0,
-          limit: 10,
+          limit: 10
         };
-
-        // Add leave-specific parameters
-        // if (lowerQuery.includes("leave") || lowerQuery.includes("vacation")) {
-        //   data.fromDate = new Date(now.getFullYear(), 0, 1).toISOString();
-        //   data.toDate = now.toISOString();
-        // }
-
-        // // Add project-specific parameters
-        // if (lowerQuery.includes("project") || lowerQuery.includes("task")) {
-        //   data.page = 0;
-        //   data.limit = 10;
-        //   data.filter = "all";
-        // }
-
-        // // Add timesheet-specific parameters
-        // if (lowerQuery.includes("timesheet") || lowerQuery.includes("work")) {
-        //   data.index = 0;
-        //   data.limit = 10;
-        // }
 
         return data;
       }
@@ -928,13 +911,11 @@
       function extractAnswer(response) {
         if (!response) return "No response received";
 
-        // Handle LangChain agent response structure
         if (response.answer) {
           if (typeof response.answer === "string") {
             return response.answer;
           }
 
-          // If answer is an object (LangChain message structure)
           if (
             response.answer.messages &&
             Array.isArray(response.answer.messages)
@@ -946,14 +927,12 @@
             }
           }
 
-          // Fallback
           return JSON.stringify(response.answer, null, 2);
         }
 
         return "Unable to process response";
       }
 
-      // Event Handlers
       function handleKeyPress(event) {
         if (event.key === "Enter" && !event.shiftKey) {
           event.preventDefault();
@@ -961,9 +940,7 @@
         }
       }
 
-      // Initialize App
       document.addEventListener("DOMContentLoaded", () => {
-        // Check if user is already logged in
         if (loadSession()) {
           showLoginPage(false);
           showChatPage(true);
@@ -974,7 +951,6 @@
         }
       });
 
-      // Focus input on load
       window.addEventListener("load", () => {
         const activeInput =
           document.getElementById("messageInput") ||
