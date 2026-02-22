@@ -5,7 +5,7 @@ from datetime import datetime
 
 def register_timesheet(mcp):
     @mcp.tool()
-    async def my_timesheet_search(auth_token, request_data, date=str(datetime.today().strftime("%d-%m-%Y")))-> str:
+    async def my_timesheet_search(auth_token, request_data, date="")-> str:
         """
         Use this tool ONLY when the user asks about its timesheet details such as:
         - projects
@@ -35,22 +35,22 @@ def register_timesheet(mcp):
         if not request_data.get('_id'):
             return "Your user id is not found"
         
-        cache_key=f"timesheet:{request_data.get('_id','')}"
+        # cache_key=f"timesheet:{request_data.get('_id','')}"
 
-        # display_date_full = "today"
-        # display_date_short = "today"
+        display_date_full = "today"
+        display_date_short = "today"
 
-        # try:
-        #     final_date = normalize_date(date or request_data.get("date"))
-        # except Exception:
-        #     return "Invalid date provided. Please use format like '19 Feb' or '19-02-2026'."
+        try:
+            final_date = normalize_date(date)
+        except Exception:
+            return "Please use format like '19 Feb' or '19-02-2026'."
 
-        # if final_date:
-        #     dt = datetime.strptime(final_date, "%d-%m-%Y")
-        #     display_date_full = dt.strftime("%d %b %Y")   
-        #     display_date_short = dt.strftime("%d %b")
+        if final_date:
+            dt = datetime.strptime(final_date, "%d-%m-%Y")
+            display_date_full = dt.strftime("%d %b %Y")   
+            display_date_short = dt.strftime("%d %b")
 
-        async def search():
+        # async def search():
             TIMESHEET_API_URL = "https://api.portal.chicmicstudios.in/v1/timesheet/history?index=0&limit=10"
             
             headers = {
@@ -69,20 +69,44 @@ def register_timesheet(mcp):
                             if timesheet.get('timesheetStatus','')==1:
                                 pending_timesheet+=1
 
-                        result=f"You have {pending_timesheet} pending timesheets and remaining are approved.\nDetails of your timesheets are:\n"
+                        if final_date:
+                            matched_leaves= "\n".join([
+                                f"(- Date of the timesheet: {datetime.strptime(timesheet.get('entryDate'), '%Y-%m-%d').strftime('%d-%m-%Y')} or {display_date_full} or {display_date_short}\n"
+                                f"- Time Spent on the timesheet: {timesheet.get('timeSpent')}\n"
+                                f"- Projects included in timesheet: {timesheet.get('projects')}\n"
+                                # f"- Upwork Status: {'Approved' if timesheet.get('upworkStatus')==2 else 'Pending'}\n"
+                                f"- This timesheet is submitted and {'Approved' if timesheet.get('timesheetStatus')==2 else 'Pending'} (This is status of timesheet)\n"
+                                f"- This timesheet is filled/submitted by you ({timesheet.get('userName')}) having employee id : {timesheet.get('employeeId')})"
+                                for timesheet in data if datetime.strptime(timesheet.get('entryDate'), '%Y-%m-%d').strftime('%d-%m-%Y')==final_date
+                            ])
+                            if matched_leaves:
+                                return matched_leaves
+    
+
+                        result=f"You have {pending_timesheet} pending timesheets and remaining are approved.\nDetails of your pending timesheets are:\n"
                         result+= "\n\n".join([
-                            f"(- Date of the timesheet: {datetime.strptime(timesheet.get('entryDate'), '%Y-%m-%d').strftime('%d-%m-%Y')} or {datetime.strptime(timesheet.get('entryDate'), '%Y-%m-%d').strftime('%d-%B-%Y')} or {datetime.strptime(timesheet.get('entryDate'), '%Y-%m-%d').strftime('%d-%b')}\n"
+                            f"(- Date of the timesheet: {datetime.strptime(timesheet.get('entryDate'), '%Y-%m-%d').strftime('%d-%m-%Y')} or {'today' if datetime.today()==datetime.strptime(timesheet.get('entryDate'), '%Y-%m-%d') else datetime.strptime(timesheet.get('entryDate'), '%Y-%m-%d').strftime('%d-%B-%Y')} or {datetime.strptime(timesheet.get('entryDate'), '%Y-%m-%d').strftime('%d-%B')}\n"
                             f"- Time Spent on the timesheet: {timesheet.get('timeSpent')}\n"
                             f"- Projects included in timesheet: {timesheet.get('projects')}\n"
                             # f"- Upwork Status: {'Approved' if timesheet.get('upworkStatus')==2 else 'Pending'}\n"
                             f"- This timesheet is submitted and {'Approved' if timesheet.get('timesheetStatus')==2 else 'Pending'} (This is status of timesheet)\n"
                             f"- This timesheet is filled/submitted by you ({timesheet.get('userName')}) having employee id : {timesheet.get('employeeId')})"
-                            for timesheet in data
+                            for timesheet in data if timesheet.get('timesheetStatus')==1
                         ])
 
+                        result+="\n\nDetails of your approved timesheets are:\n"
+                        result+= "\n\n".join([
+                            f"(- Date of the timesheet: {datetime.strptime(timesheet.get('entryDate'), '%Y-%m-%d').strftime('%d-%m-%Y')} or {display_date_full} or {display_date_short}\n"
+                            f"- Time Spent on the timesheet: {timesheet.get('timeSpent')}\n"
+                            f"- Projects included in timesheet: {timesheet.get('projects')}\n"
+                            # f"- Upwork Status: {'Approved' if timesheet.get('upworkStatus')==2 else 'Pending'}\n"
+                            f"- This timesheet is submitted and {'Approved' if timesheet.get('timesheetStatus')==2 else 'Pending'} (This is status of timesheet)\n"
+                            f"- This timesheet is filled/submitted by you ({timesheet.get('userName')}) having employee id : {timesheet.get('employeeId')})"
+                            for timesheet in data if timesheet.get('timesheetStatus')==2
+                        ])
                         return result
                     else:
                         return f"Error: Received {response.status_code} from API."
                 except Exception as e:
                     return f"Failed to connect to timesheet API: {str(e)}"
-        return await get_cached_or_search(cache_key, search)        
+        # return await get_cached_or_search(cache_key, search)        

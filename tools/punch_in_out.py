@@ -4,7 +4,7 @@ from utils.format_date import normalize_date
 
 def register_punch_tool(mcp):
   @mcp.tool()
-  async def punch_in_out(auth_token, request_data, date):
+  async def punch_in_out(auth_token, request_data, date=datetime.today().strftime('%d-%m-%Y')):
 
       """
     Use this tool when the user asks ONLY about:
@@ -33,7 +33,6 @@ def register_punch_tool(mcp):
           "Content-Type": "application/json"
         }
 
-      display_date_full = "today"
       display_date_short = "today"
 
       try:
@@ -57,7 +56,7 @@ def register_punch_tool(mcp):
               f"punched {punch.get('devDirection')} on date : {datetime.fromisoformat(punch.get('attPunchDownDate').replace('Z', '+00:00')).strftime('%d %B %Y, %I:%M %p')} or {display_date_short} or {final_date}\n"
               f"punched at : {punch.get('deviceName')}\n"
               
-              for punch in punch_data
+              for punch in punch_data if datetime.fromisoformat(punch.get('attPunchDownDate').replace('Z', '+00:00')).strftime('%d-%m-%Y') == final_date 
             ])
             
           except Exception as e:

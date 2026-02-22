@@ -4,7 +4,7 @@ from datetime import datetime
 
 def register_time_spent(mcp):
     @mcp.tool()
-    async def time_spent(auth_token, request_data, date):
+    async def time_spent(auth_token, request_data, date=datetime.today().strftime('%d-%m-%Y')):
         """
         Use this tool when user asks ONLY about:
         - time spent of the day
