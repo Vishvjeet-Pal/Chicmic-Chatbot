@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Chicmic Studios HR Assistant</title>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
       * {
         margin: 0;
@@ -292,13 +293,25 @@
         border-bottom-right-radius: 3px;
       }
 
-      .message.assistant .message-content {
-    background: #e8e8e8;
-    color: #333;
-    border-bottom-left-radius: 3px;
-    white-space: pre-wrap; /* Add this */
-    font-family: inherit;   /* Add this so it doesn't look like code */
-}
+      /* Update the assistant message content area */
+        .message.assistant .message-content {
+            background: #e8e8e8;
+            color: #333;
+            border-bottom-left-radius: 3px;
+            padding: 12px 16px;
+        }
+
+        /* Ensure Markdown elements like lists and bold text look good */
+        .message-content p {
+            margin-bottom: 8px;
+        }
+        .message-content ul, .message-content ol {
+            margin-left: 20px;
+            margin-bottom: 8px;
+        }
+        .message-content strong {
+            font-weight: 600;
+        }
 
       .message-time {
         font-size: 12px;
@@ -843,59 +856,59 @@
     sendBtn.disabled = true;
     state.conversation.push({ role: "user", content: message });
 
+    // 1. Show Typing Indicator and keep it there!
     showTypingIndicator();
+    clearEmptyState();
     
     try {
         const requestData = buildRequestData();
-        // Updated URL and headers to match your state management
         const response = await fetch(
             `/ask-stream?query=${encodeURIComponent(message)}`,
             {
                 method: "POST",
                 headers: {
-                    "Authorization": state.authToken, // Use the state variable
+                    "Authorization": localStorage.getItem('token'),
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify(requestData)
             }
         );
 
-        removeTypingIndicator();
-        clearEmptyState();
-
         const container = document.getElementById("messagesContainer");
+        const indicator = document.getElementById("typingIndicator");
+
+        // 2. Create the assistant message bubble 
+        // We insert it BEFORE the typing indicator so the dots stay at the bottom
         const messageDiv = document.createElement("div");
         messageDiv.className = "message assistant";
         const time = formatTime(new Date());
-        
-        // Use a class reference instead of a static ID to allow multiple messages
         messageDiv.innerHTML = `
             <div class="message-wrapper">
-                <pre class="message-content" style="white-space: pre-wrap;"></pre>
+                <div class="message-content" style="white-space: pre-wrap;"></div>
                 <div class="message-time">${time}</div>
             </div>
         `;
-
-        container.appendChild(messageDiv);
-        const textContainer = messageDiv.querySelector(".message-content");
+        
+        // Use insertBefore to keep the typing dots at the very bottom
+        container.insertBefore(messageDiv, indicator);
+        const contentArea = messageDiv.querySelector(".message-content");
 
         const reader = response.body.getReader();
         const decoder = new TextDecoder("utf-8");
-
         let fullResponse = "";
 
+        // 3. Loop through chunks
         while (true) {
             const { value, done } = await reader.read();
             if (done) break;
 
             const chunk = decoder.decode(value, { stream: true });
             
-            // Basic filtering to ensure we aren't displaying raw tool metadata
-            if (chunk && !chunk.includes("tool_calls")) {
-                fullResponse += chunk;
-                textContainer.textContent = fullResponse;
-                container.scrollTop = container.scrollHeight;
-            }
+            fullResponse += chunk;
+
+            contentArea.innerHTML = marked.parse(fullResponse); 
+            
+            container.scrollTop = container.scrollHeight;
         }
 
         state.conversation.push({
@@ -904,10 +917,14 @@
         });
 
     } catch (error) {
-        removeTypingIndicator();
-        addAssistantMessage("⚠️ Connection error. Please try again.");
         console.error("Streaming error:", error);
+        const errorDiv = document.createElement("div");
+        errorDiv.className = "message assistant";
+        errorDiv.innerHTML = `<div class="message-content error">⚠️ Connection error.</div>`;
+        container.appendChild(errorDiv);
     } finally {
+        // 4. FINALLY remove the dots once the loop is complete
+        removeTypingIndicator();
         sendBtn.disabled = false;
     }
 }

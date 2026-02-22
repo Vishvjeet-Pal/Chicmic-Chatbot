@@ -128,10 +128,6 @@ async def ask_chatbot(query: str, Authorization:str=Header(...), request_data: d
         }
     )
     return {"answer": result}#["messages"][-1].content}
- 
-
-from fastapi.responses import StreamingResponse
-from langchain_core.messages import HumanMessage
 
 @app.post("/ask-stream")
 async def ask_chatbot_stream(
@@ -154,8 +150,7 @@ async def ask_chatbot_stream(
                 },
                 stream_mode="messages", # Note: LangGraph returns (msg, metadata)
             ):
-                # We only want chunks from the final 'agent' or 'model' node
-                # to avoid streaming internal tool logs.
+                # yield(str(msg))
                 if isinstance(msg, AIMessageChunk):
                     content = msg.content
                     if content:
