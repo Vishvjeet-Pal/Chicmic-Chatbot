@@ -1,16 +1,15 @@
 import os
-from fastapi import FastAPI, Body, Header, Request
+from fastapi import FastAPI, Body, Header
 from langchain_ollama import ChatOllama
 from langchain.agents import create_agent
-from langchain_core.messages import HumanMessage
+from langchain_core.messages import HumanMessage, AIMessageChunk
 from langchain_mcp_adapters.client import MultiServerMCPClient
-from langchain_core.runnables import RunnableConfig
 from langchain_core.tools import BaseTool
 from functools import wraps
-from fastapi.responses import FileResponse
-
-# from langchain_groq import ChatGroq
-# from config import settings
+from fastapi.responses import FileResponse, StreamingResponse
+import json
+from langchain_groq import ChatGroq
+from config import settings
 from seed.holidays import HOLIDAYS
 # from ingest.holiday_ingest import ingest_holidays_from_api
 from seed.timesheets import timesheets
@@ -26,9 +25,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-llm = ChatOllama(model="llama3.1", temperature=1,base_url="http://192.180.5.31:11434")
+# llm = ChatOllama(model="llama3.1", temperature=1,base_url="http://192.180.5.31:11434")
 # llm = ChatOllama(model="qwen2.5:7b", temperature=0,base_url="http://192.180.5.31:11434")
-# llm = ChatGroq(model="llama-3.3-70b-versatile", temperature=0, api_key=settings.GROQ_API_KEY)
+llm = ChatGroq(model="openai/gpt-oss-20b", temperature=0, api_key=settings.GROQ_API_KEY)
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 server_path = os.path.join(current_dir, "mcp_server.py")
@@ -130,6 +129,55 @@ async def ask_chatbot(query: str, Authorization:str=Header(...), request_data: d
     )
     return {"answer": result}#["messages"][-1].content}
  
+
+from fastapi.responses import StreamingResponse
+from langchain_core.messages import HumanMessage
+
+@app.post("/ask-stream")
+async def ask_chatbot_stream(
+    query: str,
+    Authorization: str = Header(...),
+    request_data: dict = Body(None)
+):
+    if agent is None:
+        return {"error": "Agent not initialized"}
+
+    async def event_generator():
+        try:
+            async for msg, metadata in agent.astream(
+                {"messages": [HumanMessage(content=query)]},
+                config={
+                    "configurable": {
+                        "auth_token": Authorization,
+                        "request_data": request_data or {}
+                    }
+                },
+                stream_mode="messages", # Note: LangGraph returns (msg, metadata)
+            ):
+                # We only want chunks from the final 'agent' or 'model' node
+                # to avoid streaming internal tool logs.
+                if isinstance(msg, AIMessageChunk):
+                    content = msg.content
+                    if content:
+                        yield str(content)
+                        
+        except Exception as e:
+            yield f" [ERROR]: {str(e)}"
+
+    return StreamingResponse(
+        event_generator(),
+        media_type="text/event-stream", # Changed to event-stream for better browser support
+        headers={
+            "X-Accel-Buffering": "no",  # Disables buffering in Nginx
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+        }
+    )
+
+@app.get("/streaming")
+def serve_index_streaming():
+    return FileResponse("index_streaming.html")
+
 @app.get("/holidays")
 async def get_holiday_calendar():
     return HOLIDAYS
