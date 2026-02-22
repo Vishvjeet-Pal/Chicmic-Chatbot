@@ -27,7 +27,7 @@ def register_timesheet(mcp):
             - If no year is mentioned in date, Do NOT assume the year.
 
         args:
-        - auth_token
+        - auth_token: provided in the header of request
         - request_data
         - date: provided by user in the query, if no date is mentioned in the query take default value of date provided in tool definition
         """
