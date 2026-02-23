@@ -2,16 +2,15 @@ import os
 from fastapi import FastAPI, Body, Header
 from langchain_ollama import ChatOllama
 from langchain.agents import create_agent
-from langchain_core.messages import HumanMessage, AIMessageChunk
+from langchain_core.messages import HumanMessage, AIMessageChunk, AIMessage
 from langchain_mcp_adapters.client import MultiServerMCPClient
 from langchain_core.tools import BaseTool
 from functools import wraps
 from fastapi.responses import FileResponse, StreamingResponse
-import json
 from langchain_groq import ChatGroq
 from config import settings
 from seed.holidays import HOLIDAYS
-# from ingest.holiday_ingest import ingest_holidays_from_api
+import asyncio
 from seed.timesheets import timesheets
 
 app = FastAPI()
@@ -25,9 +24,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-# llm = ChatOllama(model="llama3.1", temperature=1,base_url="http://192.180.5.31:11434")
-# llm = ChatOllama(model="qwen2.5:7b", temperature=0,base_url="http://192.180.5.31:11434")
-llm = ChatGroq(model="openai/gpt-oss-20b", temperature=0, api_key=settings.GROQ_API_KEY)
+# llm = ChatOllama(model="gpt-oss:20b", temperature=1,base_url="http://192.180.5.31:11434", streaming=True)
+# llm = ChatOllama(model="llama3.1", temperature=0,base_url="http://192.180.5.31:11434")
+llm = ChatGroq(model="openai/gpt-oss-20b", temperature=0, api_key=settings.GROQ_API_KEY_KASHISH, streaming=True)
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 server_path = os.path.join(current_dir, "mcp_server.py")
@@ -44,7 +43,7 @@ async def get_mcp_tools():
 
 
 
-system_prompt = """You are a Chatbot Assistant of "Chicmic Studios" company. Use tools to query the DB. Answer user queries based on the retrieved information. If you don't know the answer, say you don't know. ONLY answer what is asked. DO NOT provide extra information. If you are not sure which tool to use, use search_pdf_policy tool first to check if the answer is in the FAQs.
+system_prompt = """You are a Chatbot Assistant of "Chicmic Studios" company. Use tools to query the DB. Answer user queries based on the retrieved information. If you don't know the answer, say you don't know. ONLY answer what is asked. DO NOT provide extra information.
 IMPORTANT INSTRUCTION: 
 - IF YOU CAN NOT DECIDE WHICH TOOL TO USE, SAY "I don't know".
 - NEVER return internal json data to user. 
@@ -55,11 +54,16 @@ Return ONLY the final answer text.
 DO NOT mention the tools used.
 STRICT RULES:
     - IF NO YEAR IS MENTIONED IN DATE, DO NOT ASSUME THE YEAR.
+    - IF ONLY MONTH IS MENTIONED IN DATE, DO NOT TAKE ANY VALUE FOR DATE ARGUMENT
+If user asks about leave deduction use get_daily_attendence tool.
 If the user asks ANYTHING related to holidays
    (examples: next holiday, upcoming holidays, holiday list, holiday date, company holidays, leave with holiday, etc.)
-   → ALWAYS return the COMPLETE Holiday Calendar provided in the context for user reference.
+   → ALWAYS call list_holidays tool and return the COMPLETE Holiday Calendar for user reference.
      Only mention the holidays which are present in the Holiday Calendar document provided in the context. Do NOT generate or assume any holiday information that is not in the document.
-NOTE: Use get_user_profile_data tool if user asks about LEAVE BALANCE or PROFILE DATA. Provide complete profile data if user asks about its profile data.
+NOTE: 
+Use get_user_profile_data tool if user asks about LEAVE BALANCE or PROFILE DATA and get_user_leaves if user asks about PENDING/APPROVED LEAVES. Treat leave balance and pending leave differently. Provide complete profile data if user asks about its profile data.
+Use my_timesheet_search tool when user asks about timesheet details
+Use get_daily_attendance tool when user asks about ATTENDANCE, ABSENT/PRESENT STATUS, leave deduction
 """
 
 agent = None   # global
@@ -127,7 +131,8 @@ async def ask_chatbot(query: str, Authorization:str=Header(...), request_data: d
             }
         }
     )
-    return {"answer": result}#["messages"][-1].content}
+    return {"answer": result["messages"][-1].content}
+
 
 @app.post("/ask-stream")
 async def ask_chatbot_stream(
@@ -142,28 +147,37 @@ async def ask_chatbot_stream(
         try:
             async for msg, metadata in agent.astream(
                 {"messages": [HumanMessage(content=query)]},
-                config={
-                    "configurable": {
-                        "auth_token": Authorization,
-                        "request_data": request_data or {}
-                    }
-                },
-                stream_mode="messages", # Note: LangGraph returns (msg, metadata)
+                config={"configurable": {"auth_token": Authorization, "request_data": request_data or {}}},
+                stream_mode="messages",
             ):
+                
                 # yield(str(msg))
-                if isinstance(msg, AIMessageChunk):
-                    content = msg.content
-                    if content:
-                        yield str(content)
-                        
+                # Detect tool calls
+                if hasattr(msg, "tool_calls") and msg.tool_calls:
+                    yield f"\n[Status: Searching {msg.tool_calls[0]['name']}...]\n"
+                
+                # Yield content chunks
+                elif (isinstance(msg,AIMessage) or isinstance(msg,AIMessageChunk)) and hasattr(msg, "content") and msg.content:
+                    if isinstance(msg.content, str):
+                        yield msg.content
+                    elif isinstance(msg.content, list):
+                        for part in msg.content:
+                            if isinstance(part, dict) and "text" in part:
+                                yield part["text"]
+
+        except asyncio.CancelledError:
+            # This is triggered when the user clicks 'Stop' (AbortController)
+            print(f"Client disconnected. Stopping LLM for query: {query}")
+            # The LLM execution will stop here because the generator is broken
+            raise 
         except Exception as e:
             yield f" [ERROR]: {str(e)}"
 
     return StreamingResponse(
         event_generator(),
-        media_type="text/event-stream", # Changed to event-stream for better browser support
+        media_type="text/plain",
         headers={
-            "X-Accel-Buffering": "no",  # Disables buffering in Nginx
+            "X-Accel-Buffering": "no",
             "Cache-Control": "no-cache",
             "Connection": "keep-alive",
         }

@@ -34,8 +34,6 @@ def register_timesheet(mcp):
 
         if not request_data.get('_id'):
             return "Your user id is not found"
-        
-        # cache_key=f"timesheet:{request_data.get('_id','')}"
 
         display_date_full = "today"
         display_date_short = "today"
@@ -45,12 +43,11 @@ def register_timesheet(mcp):
         except Exception:
             return "Please use format like '19 Feb' or '19-02-2026'."
 
+        cache_key=f"timesheet:{request_data.get('_id','')}:{final_date if final_date else ''}"
         if final_date:
             dt = datetime.strptime(final_date, "%d-%m-%Y")
-            display_date_full = dt.strftime("%d %b %Y")   
-            display_date_short = dt.strftime("%d %b")
 
-        # async def search():
+        async def search():
             TIMESHEET_API_URL = "https://api.portal.chicmicstudios.in/v1/timesheet/history?index=0&limit=10"
             
             headers = {
@@ -71,7 +68,7 @@ def register_timesheet(mcp):
 
                         if final_date:
                             matched_leaves= "\n".join([
-                                f"(- Date of the timesheet: {datetime.strptime(timesheet.get('entryDate'), '%Y-%m-%d').strftime('%d-%m-%Y')} or {display_date_full} or {display_date_short}\n"
+                                f"(- Date of the timesheet: {datetime.strptime(timesheet.get('entryDate'), '%Y-%m-%d').strftime('%d-%m-%Y')} or {'today' if datetime.today()==datetime.strptime(timesheet.get('entryDate'), '%Y-%m-%d') else datetime.strptime(timesheet.get('entryDate'), '%Y-%m-%d').strftime('%d-%B-%Y')} or {datetime.strptime(timesheet.get('entryDate'), '%Y-%m-%d').strftime('%d-%B')}\n"
                                 f"- Time Spent on the timesheet: {timesheet.get('timeSpent')}\n"
                                 f"- Projects included in timesheet: {timesheet.get('projects')}\n"
                                 # f"- Upwork Status: {'Approved' if timesheet.get('upworkStatus')==2 else 'Pending'}\n"
@@ -96,7 +93,7 @@ def register_timesheet(mcp):
 
                         result+="\n\nDetails of your approved timesheets are:\n"
                         result+= "\n\n".join([
-                            f"(- Date of the timesheet: {datetime.strptime(timesheet.get('entryDate'), '%Y-%m-%d').strftime('%d-%m-%Y')} or {display_date_full} or {display_date_short}\n"
+                            f"(- Date of the timesheet: {datetime.strptime(timesheet.get('entryDate'), '%Y-%m-%d').strftime('%d-%m-%Y')} or {'today' if datetime.strptime(timesheet.get('entryDate'), '%Y-%m-%d')==datetime.today().strftime('%Y-%m-%d') else datetime.strptime(timesheet.get('entryDate'), '%Y-%m-%d').strftime('%d-%B-%Y')} or {datetime.strptime(timesheet.get('entryDate'), '%Y-%m-%d').strftime('%d-%B')}\n"
                             f"- Time Spent on the timesheet: {timesheet.get('timeSpent')}\n"
                             f"- Projects included in timesheet: {timesheet.get('projects')}\n"
                             # f"- Upwork Status: {'Approved' if timesheet.get('upworkStatus')==2 else 'Pending'}\n"
@@ -109,4 +106,4 @@ def register_timesheet(mcp):
                         return f"Error: Received {response.status_code} from API."
                 except Exception as e:
                     return f"Failed to connect to timesheet API: {str(e)}"
-        # return await get_cached_or_search(cache_key, search)        
+        return await get_cached_or_search(cache_key, search)        

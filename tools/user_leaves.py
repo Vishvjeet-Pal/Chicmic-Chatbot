@@ -14,11 +14,13 @@ def register_user_leaves(mcp):
         request_data,
         leave_type="",
         leave_reason="",
-        leave_category="",
         date=""
-    ) -> str:
+    ):
         """ 
         This tool provides details / history of leaves taken by the user. 
+        STRICT RULES:
+        - DO NOT call this tool if user asks about attendance or present/absent status
+        - DO NOT call this tool if user asks about LEAVE DEDUCTION
         It describes: 
         - applied date of leave 
         - leave duration 
@@ -27,19 +29,18 @@ def register_user_leaves(mcp):
         - leave send to 
         - total leaves taken DO NOT use this tool if user asks about LEAVE BALANCE 
         args: 
-        - auth_token 
+        - auth_token: provided in header of request 
         - leave_type: [casual leave, sick leave]. DO NOT take any other value for this argument. 
         - leave_reason: [Exams, Urgent work, emergency, marriage, other]. DO NOT take any other value for this argument. 
-        - leave_category: [Full day, Half day(first half or second half), Short leave, Full + Half day]. DO NOT take any other value for this argument. 
-        - date 
-        - request_data 
+        - date
+        - request_data: request body 
         """
         if not request_data.get('_id'):
             return "Your user id is not found"
 
         # cache_key = f"user_leaves:{request_data.get('_id','')}"
 
-        def clean(text: str) -> str:
+        def clean(text) -> str:
             return re.sub(r"\s+", " ", text.strip().lower())
 
         LEAVE_TYPE_MAP = {
@@ -97,7 +98,7 @@ def register_user_leaves(mcp):
         #     "full and half day": "Full + Half day",
         # }
 
-        def normalize(value: str, mapping: dict)->str:
+        def normalize(value, mapping: dict):
             if not value:
                 return ""
             value = clean(value)
@@ -133,7 +134,6 @@ def register_user_leaves(mcp):
 
                 normalized_type = normalize(leave_type, LEAVE_TYPE_MAP)
                 normalized_reason = normalize(leave_reason, LEAVE_TYPE_MAP)
-                normalized_category = normalize(leave_category, LEAVE_TYPE_MAP)
 
                 matched_leaves = []
 
@@ -144,9 +144,8 @@ def register_user_leaves(mcp):
                     api_category = leave.get("leaveCategory", "")
 
                     if (
-                        (normalized_type and (api_type == normalized_type or api_reason == normalized_type or api_category==normalized_type or (normalized_type.lower() in leave.get('reason','').lower()) or (leave.get('reason').lower() in normalized_type.lower())))
-                        or (normalized_reason and (api_reason == normalized_reason or api_category==normalized_reason or api_type==normalized_reason or (normalized_reason.lower() in leave.get('reason','').lower()) or (leave.get('reason').lower() in normalized_reason.lower())))
-                        or (normalized_category and (api_category == normalized_category or api_type==normalized_category or api_reason==normalized_category or (normalized_category.lower() in leave.get('reason','').lower()) or (leave.get('reason').lower() in normalized_category.lower())))
+                        (normalized_type and (api_type == normalized_type or api_reason == normalized_type or api_category==normalized_type or (normalized_type.lower() in leave.get('reason','').lower()) or (leave.get('reason','').lower() in normalized_type.lower())))
+                        or (normalized_reason and (api_reason == normalized_reason or api_category==normalized_reason or api_type==normalized_reason or (normalized_reason.lower() in leave.get('reason','').lower()) or (leave.get('reason','').lower() in normalized_reason.lower())))
                         or (date and datetime.strptime(leave.get('fromDate'), '%Y-%m-%dT%H:%M:%S.%fZ').strftime('%d-%m-%Y') == final_date)
                     ):
                         if leave not in matched_leaves:

@@ -103,6 +103,22 @@
         cursor: not-allowed;
       }
 
+      .btn-stop {
+    background: #ff4757;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.3s;
+    display: none; /* Hidden by default */
+    }
+    .btn-stop:hover {
+        background: #ff6b81;
+    }
+
       .alert {
         padding: 12px 14px;
         border-radius: 8px;
@@ -591,17 +607,16 @@
 
         <div class="input-area">
           <div class="input-field">
-            <input
-              type="text"
-              id="messageInput"
-              placeholder="Ask me about leaves, timesheets, holidays, projects..."
-              onkeypress="handleKeyPress(event)"
-            />
+              <input
+                  type="text"
+                  id="messageInput"
+                  placeholder="Ask me about leaves, timesheets, holidays, projects..."
+                  onkeypress="handleKeyPress(event)"
+              />
           </div>
-          <button class="btn-send" id="sendBtn" onclick="sendMessage()">
-            Send
-          </button>
-        </div>
+              <button class="btn-send" id="sendBtn" onclick="sendMessage()">Send</button>
+              <button class="btn-stop" id="stopBtn" onclick="stopExecution()">Stop</button>
+          </div>
       </div>
     </div>
 
@@ -839,26 +854,34 @@
       }
 
       // API Communication
-      async function sendMessage() {
+      let abortController = null; // Global controller
+
+async function stopExecution() {
+    if (abortController) {
+        abortController.abort(); // Triggers the 'catch' block in sendMessage
+        console.log("Execution stopped by user");
+    }
+}
+
+async function sendMessage() {
     const input = document.getElementById("messageInput");
     const message = input.value.trim();
     const sendBtn = document.getElementById("sendBtn");
+    const stopBtn = document.getElementById("stopBtn");
 
     if (!message) return;
-    if (!state.authToken) {
-        addAssistantMessage("Session expired. Please login again.");
-        handleLogout();
-        return;
-    }
+
+    // Initialize AbortController
+    abortController = new AbortController();
 
     addUserMessage(message);
     input.value = "";
-    sendBtn.disabled = true;
-    state.conversation.push({ role: "user", content: message });
-
-    // 1. Show Typing Indicator and keep it there!
+    
+    // Toggle buttons
+    sendBtn.style.display = "none";
+    stopBtn.style.display = "flex";
+    
     showTypingIndicator();
-    clearEmptyState();
     
     try {
         const requestData = buildRequestData();
@@ -867,18 +890,17 @@
             {
                 method: "POST",
                 headers: {
-                    "Authorization": localStorage.getItem('token'),
+                    "Authorization": localStorage.getItem('token'), // Ensure this matches your login state
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify(requestData)
+                body: JSON.stringify(requestData),
+                signal: abortController.signal // PASS THE SIGNAL HERE
             }
         );
 
         const container = document.getElementById("messagesContainer");
         const indicator = document.getElementById("typingIndicator");
 
-        // 2. Create the assistant message bubble 
-        // We insert it BEFORE the typing indicator so the dots stay at the bottom
         const messageDiv = document.createElement("div");
         messageDiv.className = "message assistant";
         const time = formatTime(new Date());
@@ -889,7 +911,6 @@
             </div>
         `;
         
-        // Use insertBefore to keep the typing dots at the very bottom
         container.insertBefore(messageDiv, indicator);
         const contentArea = messageDiv.querySelector(".message-content");
 
@@ -897,35 +918,29 @@
         const decoder = new TextDecoder("utf-8");
         let fullResponse = "";
 
-        // 3. Loop through chunks
         while (true) {
             const { value, done } = await reader.read();
             if (done) break;
 
             const chunk = decoder.decode(value, { stream: true });
-            
             fullResponse += chunk;
-
             contentArea.innerHTML = marked.parse(fullResponse); 
-            
             container.scrollTop = container.scrollHeight;
         }
 
-        state.conversation.push({
-            role: "assistant",
-            content: fullResponse,
-        });
-
     } catch (error) {
-        console.error("Streaming error:", error);
-        const errorDiv = document.createElement("div");
-        errorDiv.className = "message assistant";
-        errorDiv.innerHTML = `<div class="message-content error">⚠️ Connection error.</div>`;
-        container.appendChild(errorDiv);
+        if (error.name === 'AbortError') {
+            addAssistantMessage("🛑 Execution stopped by user.");
+        } else {
+            console.error("Streaming error:", error);
+            addAssistantMessage("⚠️ Connection error.");
+        }
     } finally {
-        // 4. FINALLY remove the dots once the loop is complete
         removeTypingIndicator();
+        sendBtn.style.display = "flex";
+        stopBtn.style.display = "none";
         sendBtn.disabled = false;
+        abortController = null;
     }
 }
 
