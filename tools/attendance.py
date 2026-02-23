@@ -9,7 +9,7 @@ def register_attendance(mcp):
         auth_token,
         request_data,
         date="",
-        status=""  # present / absent
+        status=""  
     ):
         """
             This tool provides daily timesheet and attendance details of a user.
@@ -17,22 +17,24 @@ def register_attendance(mcp):
 
             Daily attendance
             Attendance sheet
-            At what time I came to office on specified day. It DOES NOT tells the office timing of the user.
-            User was absent or present on specified day/date.
-            Total working hours
-            Time spent in office or work zone
+            Absent or present status
+            list of days when user was absent or present
+            At what time I came to office on specified day. It DOES NOT tells the office timing of the user
+            User was absent or present on specified day/date
+            Entry and exit time of user in office on specified day. It DOES NOT tells the office timing of the user. It only tells the timing when user came to office/workzone. Office timing may be different from main gate/office in time of user.
             Work from home status
             Holiday status
-            How much of my Leaves deducted
+            How much of my Leaves deducted 
             Timesheet status (pending or approved)
             Upwork status
             Main Gate in/out time of the user. It DOES NOT tell the office timing of the user.
             Note: This tool does not provide the office timing of the user. It only tells the timing when user came to office/workzone. Office timing may be different from main gate/office in time of user. 
-
+            If no date is provided, it provides the attendance of all days in the current month. If date is provided, it provides the attendance details of that specific date. Date can be in format like '19 Feb' or '19-02-2026' or '19 feb 2026'.
             args:
-            - auth_token
-            - request_data
+            - auth_token: provided in the header of request
+            - request_data: provided in the body of request
             - date
+            - status: [present, absent]. If status is provided, it filters the attendance records based on the specified status.
             """
 
         if not request_data.get("_id"):
@@ -69,7 +71,7 @@ def register_attendance(mcp):
 
                 present_days = []
                 absent_days = []
-
+                result = ""
                 for attendance in attendance_data:
                     raw_date = attendance.get("date")
                     if not raw_date:
@@ -80,21 +82,28 @@ def register_attendance(mcp):
                     ).strftime("%d-%m-%Y")
 
                     if attendance.get("guardInTime"):
-                        present_days.append(formatted_date)
+                        present_days.append(f"{formatted_date} or {datetime.fromisoformat(
+                        raw_date.replace('Z', '+00:00')
+                    ).strftime('%d-%B-%Y')} or {'today' if datetime.today().strftime('%d-%m-%Y') == formatted_date else datetime.fromisoformat(
+                        raw_date.replace('Z', '+00:00')
+                    ).strftime('%d-%b')}")
                     else:
-                        absent_days.append(formatted_date)
-
-                # 🔹 If user asked for absent list
+                        absent_days.append(f"{formatted_date} or {datetime.fromisoformat(
+                        raw_date.replace('Z', '+00:00')
+                    ).strftime('%d-%B-%Y')} or {'today' if datetime.today().strftime('%d-%m-%Y') == formatted_date else datetime.fromisoformat(
+                        raw_date.replace('Z', '+00:00')
+                    ).strftime('%d-%b')}")
                 if status.lower() == "absent":
                     if not absent_days:
-                        return "You have no absent records."
-                    return "You were absent on:\n" + "\n".join(absent_days)
+                        return "You have no absent records.\n"
+                    else:
+                        return "You were absent on:\n" + "\n".join(absent_days) + "\n"
 
-                # 🔹 If user asked for present list
                 if status.lower() == "present":
                     if not present_days:
-                        return "You have no present records."
-                    return "You were present on:\n" + "\n".join(present_days)
+                        return "You have no present records.\n"
+                    else:
+                        return "You were present on:\n" + "\n".join(present_days) + "\n"
 
                 # 🔹 If user asked for specific date
                 if date and final_date:
@@ -109,38 +118,55 @@ def register_attendance(mcp):
 
                         if formatted_date == final_date:
                             return (
-                                f"Attendance for {formatted_date}:\n\n"
+                                f"Attendance for {formatted_date} or {datetime.fromisoformat(
+                        raw_date.replace('Z', '+00:00')
+                    ).strftime('%d-%B-%Y')} or {'today' if datetime.today().strftime('%d-%m-%Y') == formatted_date else datetime.fromisoformat(
+                        raw_date.replace('Z', '+00:00')
+                    ).strftime('%d-%b')}:\n\n"
                                 f"Status: {'PRESENT' if attendance.get('guardInTime') else 'ABSENT'}\n"
                                 f"Work Zone In Time: "
                                 f"{datetime.strptime(attendance.get('inTime'), '%Y-%m-%dT%H:%M:%S.%fZ').replace(tzinfo=timezone.utc).astimezone(IST).strftime('%I:%M %p') if attendance.get('inTime') else 'Not mentioned'}\n"
                                 f"Work Zone Out Time: "
                                 f"{datetime.strptime(attendance.get('outTime'), '%Y-%m-%dT%H:%M:%S.%fZ').replace(tzinfo=timezone.utc).astimezone(IST).strftime('%I:%M %p') if attendance.get('outTime') else 'Not mentioned'}\n"
+                                f"Main Gate In Time or entry in office: "
+                                f"{datetime.strptime(attendance.get('guardInTime'), '%Y-%m-%dT%H:%M:%S.%fZ').replace(tzinfo=timezone.utc).astimezone(IST).strftime('%I:%M %p') if attendance.get('guardInTime') else 'Not mentioned'}\n"
+                                f"Main Gate Out Time or exit from office: "
+                                f"{datetime.strptime(attendance.get('guardOutTime'), '%Y-%m-%dT%H:%M:%S.%fZ').replace(tzinfo=timezone.utc).astimezone(IST).strftime('%I:%M %p') if attendance.get('guardOutTime') else 'Not mentioned'}\n"
+                                f"Leaves Deducted: {attendance.get('leavesDeducted', 0)}\n"
                                 f"Timesheet Status: "
                                 f"{'Approved' if attendance.get('timesheetStatus') == 2 else 'Pending'}\n"
                                 f"Upwork Status: "
                                 f"{'Approved' if attendance.get('upworkStatus') == 2 else 'Pending'}\n"
                             )
                 
-                return "\n\n".join([
-                        f"Attendance for {attendance.get('date')}:\n\n"
+                leave_deducted=sum([attendance.get('leavesDeducted', 0) for attendance in attendance_data])
+                result+=f"Total Leaves Deducted : {leave_deducted}\n"
+                return result+"\n\n".join([
+                        f"Attendance for {datetime.fromisoformat(
+                            attendance.get('date').replace("Z", "+00:00")
+                        ).strftime("%d-%m-%Y")} or {datetime.fromisoformat(
+                            attendance.get('date').replace("Z", "+00:00")
+                        ).strftime("%d-%B-%Y")} or {'today' if datetime.today().strftime('%d-%m-%Y') == datetime.fromisoformat(
+                            attendance.get('date').replace("Z", "+00:00")
+                        ).strftime("%d-%m-%Y") else datetime.fromisoformat(
+                            attendance.get('date').replace("Z", "+00:00")
+                        ).strftime("%d-%b")}:\n\n"
                                 f"Status: {'PRESENT' if attendance.get('guardInTime') else 'ABSENT'}\n"
                                 f"Work Zone In Time: "
                                 f"{datetime.strptime(attendance.get('inTime'), '%Y-%m-%dT%H:%M:%S.%fZ').replace(tzinfo=timezone.utc).astimezone(IST).strftime('%I:%M %p') if attendance.get('inTime') else 'Not mentioned'}\n"
                                 f"Work Zone Out Time: "
                                 f"{datetime.strptime(attendance.get('outTime'), '%Y-%m-%dT%H:%M:%S.%fZ').replace(tzinfo=timezone.utc).astimezone(IST).strftime('%I:%M %p') if attendance.get('outTime') else 'Not mentioned'}\n"
+                                f"Main Gate In Time or entry in office: "
+                                f"{datetime.strptime(attendance.get('guardInTime'), '%Y-%m-%dT%H:%M:%S.%fZ').replace(tzinfo=timezone.utc).astimezone(IST).strftime('%I:%M %p') if attendance.get('guardInTime') else 'Not mentioned'}\n"
+                                f"Main Gate Out Time or exit from office: "
+                                f"{datetime.strptime(attendance.get('guardOutTime'), '%Y-%m-%dT%H:%M:%S.%fZ').replace(tzinfo=timezone.utc).astimezone(IST).strftime('%I:%M %p') if attendance.get('guardOutTime') else 'Not mentioned'}\n"
+                                f"Leaves Deducted: {attendance.get('leavesDeducted', 0)}\n"
                                 f"Timesheet Status: "
                                 f"{'Approved' if attendance.get('timesheetStatus') == 2 else 'Pending'}\n"
                                 f"Upwork Status: "
                                 f"{'Approved' if attendance.get('upworkStatus') == 2 else 'Pending'}\n"
                                 for attendance in attendance_data
                     ])
-
-                # 🔹 Default summary
-                return (
-                    f"Attendance Summary:\n\n"
-                    f"Total Present Days: {len(present_days)}\n"
-                    f"Total Absent Days: {len(absent_days)}\n"
-                )
 
             except Exception as e:
                 return f"Error while connecting to attendance API: {str(e)}"

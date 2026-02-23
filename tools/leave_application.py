@@ -2,7 +2,7 @@ import httpx
 
 def register_leave_application(mcp):
     @mcp.tool()
-    async def leave_application(auth_token, request_data):
+    async def leave_application(auth_token, request_data, emplyee_name=""):
         """  
         This tool retrieves leave application records from the ERP system.
 
@@ -36,8 +36,9 @@ The tool returns formatted leave application data containing:
 - Year
 
         args:
-        - auth_token: The authentication token for API access.
-        - request_data: The request data containing necessary parameters for the API call.
+        - auth_token: The authentication token for API access. Provided in the Authorization header of the request.
+        - request_data: The request data containing necessary parameters for the API call. Provided in the body of the request.
+        - employee_name: (Optional) The name of the employee whose leave applications are to be retrieved. If not provided, it retrieves leave applications for all employees.
         """
 
         LEAVE_APPLICATION_API_URL = f"https://erp-staging.projectlabs.in/v1/leave/requests"
