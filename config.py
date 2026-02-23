@@ -15,6 +15,6 @@ class Setting:
     USERNAME = os.getenv("MY_USERNAME")
     PASSWORD = os.getenv("PASSWORD")
     LEAVE_CALCULATION_URL= os.getenv("LEAVE_CALCULATION_URL")
-
+    GROQ_API_KEY_KASHISH=os.getenv("GROQ_API_KEY_KASHISH")
 
 settings=Setting()
