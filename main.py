@@ -64,6 +64,8 @@ NOTE:
 Use get_user_profile_data tool if user asks about LEAVE BALANCE or PROFILE DATA and get_user_leaves if user asks about PENDING/APPROVED LEAVES. Treat leave balance and pending leave differently. Provide complete profile data if user asks about its profile data.
 Use my_timesheet_search tool when user asks about timesheet details
 Use get_daily_attendance tool when user asks about ATTENDANCE, ABSENT/PRESENT STATUS, leave deduction
+Use get_user_leaves if user asks about its own leaves and leave_application tool if user asks about other employees leaves.
+If user asks about leave details of employees by specifying employee name, team, employee id, reporting manager, leave type, reason, date or status, use leave_application tool to get the details. If no employee name, team, employee id, reporting manager, leave type, reason, date or status is specified in user's query, then use get_user_leaves tool to get the leave details of the user itself.
 """
 
 agent = None   # global

@@ -47,7 +47,7 @@ def register_timesheet(mcp):
         if final_date:
             dt = datetime.strptime(final_date, "%d-%m-%Y")
 
-        async def search():
+        # async def search():
             TIMESHEET_API_URL = "https://api.portal.chicmicstudios.in/v1/timesheet/history?index=0&limit=10"
             
             headers = {
@@ -106,4 +106,4 @@ def register_timesheet(mcp):
                         return f"Error: Received {response.status_code} from API."
                 except Exception as e:
                     return f"Failed to connect to timesheet API: {str(e)}"
-        return await get_cached_or_search(cache_key, search)        
+        # return await get_cached_or_search(cache_key, search)        
