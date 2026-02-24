@@ -66,6 +66,7 @@ Use my_timesheet_search tool when user asks about timesheet details
 Use get_daily_attendance tool when user asks about ATTENDANCE, ABSENT/PRESENT STATUS, leave deduction
 Use get_user_leaves if user asks about its own leaves and leave_application tool if user asks about other employees leaves.
 If user asks about leave details of employees by specifying employee name, team, employee id, reporting manager, leave type, reason, date or status, use leave_application tool to get the details. If no employee name, team, employee id, reporting manager, leave type, reason, date or status is specified in user's query, then use get_user_leaves tool to get the leave details of the user itself.
+If user asks about manual entry hours request, hubstaff, missing biometrics request use manual_hour_requests tool.
 """
 
 agent = None   # global
