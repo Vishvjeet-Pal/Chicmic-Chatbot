@@ -22,7 +22,7 @@ def register_it_task_tool(mcp):
         Args:
         - auth_token
         """
-        it_task_url = "https://erp-staging.projectlabs.in/v1/it/list?index=0&limit=10"
+        it_task_url = "https://api.portal.chicmicstudios.in/v1/it/list?index=0&limit=10"
         headers = {
             "Authorization": auth_token,
             "Content-Type": "application/json"
