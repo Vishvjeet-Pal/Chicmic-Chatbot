@@ -110,6 +110,7 @@
 
 
 import httpx
+from datetime import datetime
 
 def register_late_arrival_requests(mcp):
 
@@ -125,9 +126,11 @@ Use this tool when the user asks about:
 - Late entry approvals
 - Status of late requests
 
-Filters:
-- employee_name (optional)
-- status: pending / approved / rejected
+args:
+- auth_token: provided in the Authorization header of the request
+- request_data: body of the request
+- employee_name (optional) If no employee name is mentioned by user, provide list of all late come requests.
+- status: pending / approved / rejected / cancelled. If no status is mentioned by user, provide list of all late come requests.
         """
 
         ATTENDANCE_API_URL = "https://api.portal.chicmicstudios.in/v1/late/arrival/list"
@@ -190,12 +193,10 @@ Filters:
 
                 for req in all_requests:
 
-                    # 👤 Filter by employee name
                     if employee_name:
                         if employee_name.lower() not in (req.get("employeeFullName") or "").lower():
                             continue
 
-                    # 📌 Filter by status
                     if status:
                         if status not in valid_status_map:
                             continue
@@ -217,7 +218,7 @@ Filters:
                         f"Employee Name: {req.get('employeeFullName')}\n"
                         f"Designation: {user_data.get('designation', {}).get('name')}\n"
                         f"Team: {req.get('team')}\n"
-                        f"Date: {req.get('date')}\n"
+                        f"Came late on Date: {datetime.strptime(req.get('date'),'%Y-%m-%d').strftime('%d-%m-%Y')} or {datetime.strptime(req.get('date'),'%Y-%m-%d').strftime('%d-%B-%Y')} or {'today' if datetime.today().strftime('%Y-%m-%d')==req.get('date') else datetime.strptime(req.get('date'),'%Y-%m-%d').strftime('%d-%b')} \n"
                         f"Arrival Time: {req.get('arrivalTime')}\n"
                         f"Comments/reason: {req.get('comments')}\n"
                         f"Status: {STATUS_MAP.get(req.get('status'), 'Unknown')}\n"
