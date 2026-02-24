@@ -22,8 +22,6 @@ PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 # Referral 
 43 14 * * * cd $PROJECT_DIR && $PYTHON background-jobs/referral_job.py >> $LOG_DIR/referral.log 2>&1
 
-# Timesheet 
-43 14 * * * cd $PROJECT_DIR && $PYTHON background-jobs/timesheet_job.py >> $LOG_DIR/timesheet.log 2>&1
 EOF
 )
 
