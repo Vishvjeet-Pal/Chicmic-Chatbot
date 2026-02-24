@@ -17,7 +17,7 @@ def register_presentation_tool(mcp):
         args:
         - auth_token
         """
-        PRESENTATION_API_URL="https://erp-staging.projectlabs.in/v1/presentation/list?index=0&limit=10"
+        PRESENTATION_API_URL="https://api.portal.chicmicstudios.in/v1/presentation/list?index=0&limit=10"
         headers = {
             "Authorization": auth_token,
             "Content-Type": "application/json"

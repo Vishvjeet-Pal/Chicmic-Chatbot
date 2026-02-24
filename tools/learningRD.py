@@ -21,7 +21,7 @@ def register_learning_tool(mcp):
         args:
         - auth_token
         """
-        TASK_API_URL = "https://erp-staging.projectlabs.in/v1/learning/list?index=0&limit=10"
+        TASK_API_URL = "https://api.portal.chicmicstudios.in/v1/learning/list?index=0&limit=10"
         headers = {
             "Authorization": auth_token,
             "Content-Type": "application/json"

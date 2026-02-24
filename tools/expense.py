@@ -20,7 +20,7 @@ def register_expense_tool(mcp):
         - auth_token
         - request_data
         """
-        EXPENSE_API_URL = "https://erp-staging.projectlabs.in/v1/hrExpense/list"
+        EXPENSE_API_URL = "https://api.portal.chicmicstudios.in/v1/hrExpense/list"
         headers = {
             "Authorization": auth_token,
             "Content-Type": "application/json"
@@ -34,19 +34,21 @@ def register_expense_tool(mcp):
                     json=request_data
                 )
 
-                expense_data = response.json()["data"]["data"]
+                if response.status_code==200:
+                    expense_data = response.json()["data"]["data"]
 
-                if not expense_data:
-                    return "No expense records found."
+                    if not expense_data:
+                        return "No expense records found."
 
-                return "\n\n".join([
-                    f"Vendor Name is : {expense.get('vendorName')}\n"
-                    f"Expense Date: {datetime.fromisoformat(expense.get('date').replace('Z', '+00:00')).strftime('%d %B %Y')}\n"
-                    f"Total Amount of expense : ₹{expense.get('amount')} on "
-                    f"Category: {expense.get('categoryData')[0].get('name') if expense.get('categoryData') else 'N/A'}\n"
-                    f"Created By: {expense.get('employeeName')}\n"
-                    for expense in expense_data
-                ])
-
+                    return "\n\n".join([
+                        f"Vendor Name is : {expense.get('vendorName')}\n"
+                        f"Expense Date: {datetime.fromisoformat(expense.get('date').replace('Z', '+00:00')).strftime('%d %B %Y')}\n"
+                        f"Total Amount of expense : ₹{expense.get('amount')} on "
+                        f"Category: {expense.get('categoryData')[0].get('name') if expense.get('categoryData') else 'N/A'}\n"
+                        f"Created By: {expense.get('employeeName')}\n"
+                        for expense in expense_data
+                    ])
+                else:
+                     return f"API returned status code: {response.status_code}"
             except Exception as e:
-                return f"Error while connecting to expense API: {str(e)}"
+                    return f"Error while connecting to expense API: {str(e)}"

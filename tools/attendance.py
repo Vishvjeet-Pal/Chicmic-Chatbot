@@ -82,17 +82,9 @@ def register_attendance(mcp):
                     ).strftime("%d-%m-%Y")
 
                     if attendance.get("guardInTime"):
-                        present_days.append(f"{formatted_date} or {datetime.fromisoformat(
-                        raw_date.replace('Z', '+00:00')
-                    ).strftime('%d-%B-%Y')} or {'today' if datetime.today().strftime('%d-%m-%Y') == formatted_date else datetime.fromisoformat(
-                        raw_date.replace('Z', '+00:00')
-                    ).strftime('%d-%b')}")
+                        present_days.append(f"{formatted_date} or {datetime.fromisoformat(raw_date.replace('Z', '+00:00')).strftime('%d-%B-%Y')} or {'today' if datetime.today().strftime('%d-%m-%Y') == formatted_date else datetime.fromisoformat(raw_date.replace('Z', '+00:00')).strftime('%d-%b')}")
                     else:
-                        absent_days.append(f"{formatted_date} or {datetime.fromisoformat(
-                        raw_date.replace('Z', '+00:00')
-                    ).strftime('%d-%B-%Y')} or {'today' if datetime.today().strftime('%d-%m-%Y') == formatted_date else datetime.fromisoformat(
-                        raw_date.replace('Z', '+00:00')
-                    ).strftime('%d-%b')}")
+                        absent_days.append(f"{formatted_date} or {datetime.fromisoformat(raw_date.replace('Z', '+00:00')).strftime('%d-%B-%Y')} or {'today' if datetime.today().strftime('%d-%m-%Y') == formatted_date else datetime.fromisoformat(raw_date.replace('Z', '+00:00')).strftime('%d-%b')}")
                 if status.lower() == "absent":
                     if not absent_days:
                         return "You have no absent records.\n"
@@ -118,11 +110,7 @@ def register_attendance(mcp):
 
                         if formatted_date == final_date:
                             return (
-                                f"Attendance for {formatted_date} or {datetime.fromisoformat(
-                        raw_date.replace('Z', '+00:00')
-                    ).strftime('%d-%B-%Y')} or {'today' if datetime.today().strftime('%d-%m-%Y') == formatted_date else datetime.fromisoformat(
-                        raw_date.replace('Z', '+00:00')
-                    ).strftime('%d-%b')}:\n\n"
+                                f"Attendance for {formatted_date} or {datetime.fromisoformat(raw_date.replace('Z', '+00:00')).strftime('%d-%B-%Y')} or {'today' if datetime.today().strftime('%d-%m-%Y') == formatted_date else datetime.fromisoformat(raw_date.replace('Z', '+00:00')).strftime('%d-%b')}:\n\n"
                                 f"Status: {'PRESENT' if attendance.get('guardInTime') else 'ABSENT'}\n"
                                 f"Work Zone In Time: "
                                 f"{datetime.strptime(attendance.get('inTime'), '%Y-%m-%dT%H:%M:%S.%fZ').replace(tzinfo=timezone.utc).astimezone(IST).strftime('%I:%M %p') if attendance.get('inTime') else 'Not mentioned'}\n"
@@ -142,15 +130,7 @@ def register_attendance(mcp):
                 leave_deducted=sum([attendance.get('leavesDeducted', 0) for attendance in attendance_data])
                 result+=f"Total Leaves Deducted : {leave_deducted}\n"
                 return result+"\n\n".join([
-                        f"Attendance for {datetime.fromisoformat(
-                            attendance.get('date').replace("Z", "+00:00")
-                        ).strftime("%d-%m-%Y")} or {datetime.fromisoformat(
-                            attendance.get('date').replace("Z", "+00:00")
-                        ).strftime("%d-%B-%Y")} or {'today' if datetime.today().strftime('%d-%m-%Y') == datetime.fromisoformat(
-                            attendance.get('date').replace("Z", "+00:00")
-                        ).strftime("%d-%m-%Y") else datetime.fromisoformat(
-                            attendance.get('date').replace("Z", "+00:00")
-                        ).strftime("%d-%b")}:\n\n"
+                        f"Attendance for {datetime.fromisoformat(attendance.get('date').replace('Z', '+00:00')).strftime('%d-%m-%Y')} or {datetime.fromisoformat(attendance.get('date').replace('Z', '+00:00')).strftime('%d-%B-%Y')} or {'today' if datetime.today().strftime('%d-%m-%Y') == datetime.fromisoformat(attendance.get('date').replace('Z', '+00:00')).strftime('%d-%m-%Y') else datetime.fromisoformat(attendance.get('date').replace('Z', '+00:00')).strftime('%d-%b')}:\n\n"
                                 f"Status: {'PRESENT' if attendance.get('guardInTime') else 'ABSENT'}\n"
                                 f"Work Zone In Time: "
                                 f"{datetime.strptime(attendance.get('inTime'), '%Y-%m-%dT%H:%M:%S.%fZ').replace(tzinfo=timezone.utc).astimezone(IST).strftime('%I:%M %p') if attendance.get('inTime') else 'Not mentioned'}\n"

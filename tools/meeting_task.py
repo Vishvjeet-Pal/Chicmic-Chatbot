@@ -18,7 +18,7 @@ def register_meeting_tool(mcp):
         Args:
         - auth_token
         """
-        MEETING_API_URL = "https://erp-staging.projectlabs.in/v1/meeting/list?index=0&limit=10"
+        MEETING_API_URL = "https://api.portal.chicmicstudios.in/v1/meeting/list?index=0&limit=10"
         headers = {
             "Authorization": auth_token,
             "Content-Type": "application/json"
