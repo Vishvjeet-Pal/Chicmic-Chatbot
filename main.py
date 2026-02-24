@@ -67,6 +67,7 @@ Use get_daily_attendance tool when user asks about ATTENDANCE, ABSENT/PRESENT ST
 Use get_user_leaves if user asks about its own leaves and leave_application tool if user asks about other employees leaves.
 If user asks about leave details of employees by specifying employee name, team, employee id, reporting manager, leave type, reason, date or status, use leave_application tool to get the details. If no employee name, team, employee id, reporting manager, leave type, reason, date or status is specified in user's query, then use get_user_leaves tool to get the leave details of the user itself.
 If user asks about manual entry hours request, hubstaff, missing biometrics request use manual_hour_requests tool.
+If user asks about late come requests of employees by specifying employee name, team, employee id, reporting manager then use late_arrival_requests tool. If no employee name, team, employee id, reporting manager is specified, then use my_late_come_requests tool to provide late come details of the user itsel.
 """
 
 agent = None   # global
