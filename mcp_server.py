@@ -24,6 +24,7 @@ from tools.meeting_task import register_meeting_tool
 from tools.it_task import register_it_task_tool
 from tools.presentation import register_presentation_tool
 from tools.late_come import register_late_arrival_requests
+from tools.manual_hours import register_manual_hour_requests
 # import redis.asyncio as redis
 
 # Redis connection
@@ -69,6 +70,7 @@ register_meeting_tool(mcp)
 register_it_task_tool(mcp)
 register_presentation_tool(mcp)
 register_late_arrival_requests(mcp)
+register_manual_hour_requests(mcp)
 embeddings = OllamaEmbeddings(model="nomic-embed-text")
                
 
