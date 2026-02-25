@@ -13,11 +13,11 @@ def register_timesheet_summary_tool(mcp):
         This tool retrieves employee timesheet summary records.
 
 Use this tool when the user asks about:
-- Timesheet entries
-- Daily work hours
-- Timesheet approval status
-- Who has submitted timesheet
-- Pending timesheet approvals
+- Timesheet entries of employees
+- Daily work hours of employees
+- Timesheet approval status of employees
+- Who has submitted timesheet 
+- Pending timesheet approvals of employees
 
 args:
 - auth_token: Authorization header token
