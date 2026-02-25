@@ -29,7 +29,7 @@ def register_timesheet(mcp):
         args:
         - auth_token: provided in the header of request
         - request_data
-        - date: provided by user in the query, if no date is mentioned in the query take default value of date provided in tool definition
+        - date: provided by user in the query, if no date is mentioned in the query return 5 latest timesheet details. If user mentions today, yesterday, etc take the value accordingly in dd-mm-yyyy format.
         """
 
         if not request_data.get('_id'):
@@ -67,7 +67,7 @@ def register_timesheet(mcp):
                             return f"The api returned status code: {response.status_code}"
                     except Exception as e:
                         return f"Error while connecting to api: {str(e)}"
-                index+=50
+                index+=10
 
 
             pending_timesheet=0
@@ -87,6 +87,7 @@ def register_timesheet(mcp):
                 ])
                 if matched_leaves:
                     return matched_leaves
+                return f"No timesheet is filled for date: {final_date}"
 
 
             result=f"You have {pending_timesheet} pending timesheets and remaining are approved.\nDetails of your pending timesheets are:\n"

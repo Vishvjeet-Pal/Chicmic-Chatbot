@@ -9,7 +9,8 @@ def register_attendance(mcp):
         auth_token,
         request_data,
         date="",
-        status=""  
+        status="",
+        month=datetime.today().strftime("%b")
     ):
         """
             This tool provides daily timesheet and attendance details of a user.
@@ -30,11 +31,13 @@ def register_attendance(mcp):
             Main Gate in/out time of the user. It DOES NOT tell the office timing of the user.
             Note: This tool does not provide the office timing of the user. It only tells the timing when user came to office/workzone. Office timing may be different from main gate/office in time of user. 
             If no date is provided, it provides the attendance of all days in the current month. If date is provided, it provides the attendance details of that specific date. Date can be in format like '19 Feb' or '19-02-2026' or '19 feb 2026'.
+            Is date or status is provided, filter result on that basis
             args:
             - auth_token: provided in the header of request
             - request_data: provided in the body of request
             - date
             - status: [present, absent]. If status is provided, it filters the attendance records based on the specified status.
+            - month: takes the value of month name provide in user's query. Do NOT take default value of month if month name is mentioned in users query. If no month is provided take current month.
             """
 
         if not request_data.get("_id"):
@@ -44,8 +47,23 @@ def register_attendance(mcp):
             final_date = normalize_date(date or request_data.get("date"))
         except Exception:
             return "Invalid date provided. Please use format like '19 Feb' or '19-02-2026'."
+        
+        MONTH_MAP = {
+    "january": '0', "jan": '0',
+    "february": '1', "feb": '1',
+    "march": '2', "mar": '2',
+    "april": '3', "apr": '3',
+    "may": '4',
+    "june": '5', "jun": '5',
+    "july": '6', "jul": '6',
+    "august": '7', "aug": '7',
+    "september": '8', "sep": '8', "sept": '8',
+    "october": '9', "oct": '9',
+    "november": '10', "nov": '10',
+    "december": '11', "dec": '11',
+}
 
-        API_URL = f"https://api.portal.chicmicstudios.in/v1/timesheet/in/out?month=1&year=2026&userId={request_data['_id']}&limit=31"
+        API_URL = f"https://api.portal.chicmicstudios.in/v1/timesheet/in/out?month={MONTH_MAP.get(month.lower())}&year=2026&userId={request_data['_id']}&limit=31"
 
         headers = {
             "Authorization": auth_token,

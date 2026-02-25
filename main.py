@@ -26,7 +26,7 @@ app.add_middleware(
 )
 # llm = ChatOllama(model="gpt-oss:20b", temperature=1,base_url="http://192.180.5.31:11434", streaming=True)
 # llm = ChatOllama(model="llama3.1", temperature=0,base_url="http://192.180.5.31:11434")
-llm = ChatGroq(model="openai/gpt-oss-20b", temperature=0, api_key=settings.GROQ_API_KEY_KASHISH, streaming=True)
+llm = ChatGroq(model="openai/gpt-oss-20b", temperature=0, api_key=settings.GROQ_API_KEY, streaming=True)
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 server_path = os.path.join(current_dir, "mcp_server.py")
