@@ -164,7 +164,7 @@ from datetime import datetime
 def register_manual_hours_request_tool(mcp):
 
     @mcp.tool()
-    async def manual_hours_requests(
+    async def manual_hours_requests_other(
         auth_token,
         employee_name="",
         status="",
@@ -173,9 +173,9 @@ def register_manual_hours_request_tool(mcp):
     ):
         """
         Use this tool when user asks about:
-        - Manual hour requests
-        - Pending/Approved/Rejected requests
-        - Requests of specific employee
+        - Manual hour requests of other employees
+        - Pending/Approved/Rejected requests of other employees
+        - Requests of specific employee 
         - Requests of specific month
         - Requests of specific date (19 Feb, 19-02-2023, 2023-02-19, etc.)
 
