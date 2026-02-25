@@ -153,19 +153,19 @@ async def ask_chatbot_stream(
                 stream_mode="messages",
             ):
                 
-                yield(str(msg))
+                # yield(str(msg))
                 # Detect tool calls
-                # if hasattr(msg, "tool_calls") and msg.tool_calls:
-                #     yield f"\n[Status: Searching {msg.tool_calls[0]['name']}...]\n"
+                if hasattr(msg, "tool_calls") and msg.tool_calls:
+                    yield f"\n[Status: Searching {msg.tool_calls[0]['name']}...]\n"
                 
-                # # Yield content chunks
-                # elif (isinstance(msg,AIMessage) or isinstance(msg,AIMessageChunk)) and hasattr(msg, "content") and msg.content:
-                #     if isinstance(msg.content, str):
-                #         yield msg.content
-                #     elif isinstance(msg.content, list):
-                #         for part in msg.content:
-                #             if isinstance(part, dict) and "text" in part:
-                #                 yield part["text"]
+                # Yield content chunks
+                elif (isinstance(msg,AIMessage) or isinstance(msg,AIMessageChunk)) and hasattr(msg, "content") and msg.content:
+                    if isinstance(msg.content, str):
+                        yield msg.content
+                    elif isinstance(msg.content, list):
+                        for part in msg.content:
+                            if isinstance(part, dict) and "text" in part:
+                                yield part["text"]
 
         except asyncio.CancelledError:
             # This is triggered when the user clicks 'Stop' (AbortController)
