@@ -25,8 +25,8 @@ from tools.manual_hours import register_manual_hour_requests
 from tools.my_late_come import register_my_late_come_requests
 from tools.employee_timesheet import register_timesheet_summary_tool
 from tools.my_estimate_task import register_estimate_task
-
-
+from tools.employee_manual import register_manual_hours_request_tool
+from tools.sales_partener import register_sales_partner_tool
 mcp = FastMCP("Company Assistant")
 
 register_user_profile(mcp)
@@ -53,6 +53,8 @@ register_manual_hour_requests(mcp)
 register_my_late_come_requests(mcp)
 register_timesheet_summary_tool(mcp)
 register_estimate_task(mcp)
+register_manual_hours_request_tool(mcp)
+register_sales_partner_tool(mcp)
 embeddings = OllamaEmbeddings(model="nomic-embed-text")
                
 
