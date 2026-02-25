@@ -15,29 +15,45 @@ def register_presentation_tool(mcp):
         - Presentation date or details
 
         args:
-        - auth_token
+        - auth_token: provided in Authorization header of the request
         """
-        PRESENTATION_API_URL="https://api.portal.chicmicstudios.in/v1/presentation/list?index=0&limit=10"
         headers = {
             "Authorization": auth_token,
             "Content-Type": "application/json"
         }
 
+        index = 0
+        limit = 10
+        all_presentations = []
+
         async with httpx.AsyncClient() as client:
             try:
-                response = await client.get(PRESENTATION_API_URL, headers=headers)
+                # 🔁 Pagination Loop
+                while True:
+                    PRESENTATION_API_URL = (
+                        f"https://api.portal.chicmicstudios.in/v1/presentation/list"
+                        f"?index={index}&limit={limit}"
+                    )
 
-                if response.status_code != 200:
-                    return f"Error: Received {response.status_code} from API."
+                    response = await client.get(PRESENTATION_API_URL, headers=headers)
 
-                presentation_data = response.json().get("data", {}).get("data", [])
+                    if response.status_code != 200:
+                        return f"Error: Received {response.status_code} from API."
 
-                if not presentation_data:
+                    batch = response.json().get("data", {}).get("data", [])
+
+                    if not batch:
+                        break
+
+                    all_presentations.extend(batch)
+                    index += limit  # 🔼 increase index by 10 each iteration
+
+                if not all_presentations:
                     return "No presentations found."
 
                 formatted_presentations = []
 
-                for presentation in presentation_data:
+                for presentation in all_presentations:
 
                     # Convert to IST
                     utc_time = datetime.fromisoformat(

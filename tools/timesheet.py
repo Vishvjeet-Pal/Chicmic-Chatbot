@@ -5,7 +5,7 @@ from datetime import datetime
 
 def register_timesheet(mcp):
     @mcp.tool()
-    async def my_timesheet_search(auth_token, request_data, date="")-> str:
+    async def my_timesheet_search(auth_token, request_data, date="", month="")-> str:
         """
         Use this tool ONLY when the user asks about its timesheet details such as:
         - projects
@@ -30,6 +30,7 @@ def register_timesheet(mcp):
         - auth_token: provided in the header of request
         - request_data
         - date: provided by user in the query, if no date is mentioned in the query return 5 latest timesheet details. If user mentions today, yesterday, etc take the value accordingly in dd-mm-yyyy format.
+        - month: provided by user in the query. if month is mentioned but date is not, return timesheet details of complete month.
         """
 
         if not request_data.get('_id'):
@@ -75,7 +76,7 @@ def register_timesheet(mcp):
                 if timesheet.get('timesheetStatus','')==1:
                     pending_timesheet+=1
 
-            if final_date:
+            if date and final_date:
                 matched_leaves= "\n".join([
                     f"(- Date of the timesheet: {datetime.strptime(timesheet.get('entryDate'), '%Y-%m-%d').strftime('%d-%m-%Y')} or {'today' if datetime.today()==datetime.strptime(timesheet.get('entryDate'), '%Y-%m-%d') else datetime.strptime(timesheet.get('entryDate'), '%Y-%m-%d').strftime('%d-%B-%Y')} or {datetime.strptime(timesheet.get('entryDate'), '%Y-%m-%d').strftime('%d-%B')}\n"
                     f"- Time Spent on the timesheet: {timesheet.get('timeSpent')}\n"

@@ -26,7 +26,7 @@ app.add_middleware(
 )
 # llm = ChatOllama(model="gpt-oss:20b", temperature=1,base_url="http://192.180.5.31:11434", streaming=True)
 # llm = ChatOllama(model="llama3.1", temperature=0,base_url="http://192.180.5.31:11434")
-llm = ChatGroq(model="openai/gpt-oss-20b", temperature=0, api_key=settings.GROQ_API_KEY, streaming=True)
+llm = ChatGroq(model="openai/gpt-oss-120b", temperature=0, api_key=settings.GROQ_API_KEY, streaming=True)
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 server_path = os.path.join(current_dir, "mcp_server.py")
@@ -153,19 +153,19 @@ async def ask_chatbot_stream(
                 stream_mode="messages",
             ):
                 
-                # yield(str(msg))
+                yield(str(msg))
                 # Detect tool calls
-                if hasattr(msg, "tool_calls") and msg.tool_calls:
-                    yield f"\n[Status: Searching {msg.tool_calls[0]['name']}...]\n"
+                # if hasattr(msg, "tool_calls") and msg.tool_calls:
+                #     yield f"\n[Status: Searching {msg.tool_calls[0]['name']}...]\n"
                 
-                # Yield content chunks
-                elif (isinstance(msg,AIMessage) or isinstance(msg,AIMessageChunk)) and hasattr(msg, "content") and msg.content:
-                    if isinstance(msg.content, str):
-                        yield msg.content
-                    elif isinstance(msg.content, list):
-                        for part in msg.content:
-                            if isinstance(part, dict) and "text" in part:
-                                yield part["text"]
+                # # Yield content chunks
+                # elif (isinstance(msg,AIMessage) or isinstance(msg,AIMessageChunk)) and hasattr(msg, "content") and msg.content:
+                #     if isinstance(msg.content, str):
+                #         yield msg.content
+                #     elif isinstance(msg.content, list):
+                #         for part in msg.content:
+                #             if isinstance(part, dict) and "text" in part:
+                #                 yield part["text"]
 
         except asyncio.CancelledError:
             # This is triggered when the user clicks 'Stop' (AbortController)
