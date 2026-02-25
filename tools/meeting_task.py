@@ -18,31 +18,43 @@ def register_meeting_tool(mcp):
         Args:
         - auth_token
         """
-        MEETING_API_URL = "https://api.portal.chicmicstudios.in/v1/meeting/list?index=0&limit=10"
         headers = {
             "Authorization": auth_token,
             "Content-Type": "application/json"
         }
 
+        index = 0
+        limit = 10
+        all_meetings = []
+
         async with httpx.AsyncClient() as client:
             try:
-                response = await client.get(
-                    MEETING_API_URL,
-                    headers=headers,
-                )
+                while True:
+                    MEETING_API_URL = f"https://api.portal.chicmicstudios.in/v1/meeting/list?index={index}&limit={limit}"
 
-                if response.status_code != 200:
-                    return f"API Error {response.status_code}: {response.text}"
+                    response = await client.get(
+                        MEETING_API_URL,
+                        headers=headers,
+                    )
 
-                response_json = response.json()
-                meeting_data = response_json.get("data", {}).get("data", [])
+                    if response.status_code != 200:
+                        return f"API Error {response.status_code}: {response.text}"
 
-                if not meeting_data:
+                    response_json = response.json()
+                    meeting_data = response_json.get("data", {}).get("data", [])
+
+                    if not meeting_data:
+                        break
+
+                    all_meetings.extend(meeting_data)
+                    index += 10  # 🔼 increase index by 10
+
+                if not all_meetings:
                     return "No meeting records found."
 
                 formatted_meetings = []
 
-                for meeting in meeting_data:
+                for meeting in all_meetings:
 
                     resources = ", ".join([
                         f"{r.get('employeeFullName')} ({r.get('teamNames')})"
@@ -55,7 +67,6 @@ def register_meeting_tool(mcp):
                         .strftime("%d %B %Y, %I:%M %p")
                         if meeting_time else "N/A"
                     )
-
 
                     created_at = meeting.get("createdAt")
 
