@@ -1,9 +1,6 @@
 from mcp.server.fastmcp import FastMCP
 from langchain_ollama import OllamaEmbeddings
-import os
-import httpx
 from vector_data import vector_store
-from datetime import datetime, timedelta, timezone
 from tools.attendance import register_attendance
 from tools.holidays import register_holidays
 from tools.project_details import register_project
@@ -27,27 +24,7 @@ from tools.late_come import register_late_arrival_requests
 from tools.manual_hours import register_manual_hour_requests
 from tools.my_late_come import register_my_late_come_requests
 from tools.employee_timesheet import register_timesheet_summary_tool
-# import redis.asyncio as redis
-
-# Redis connection
-# redis_client = redis.Redis(
-#     host="localhost",
-#     port=6379,
-#     decode_responses=True,
-#     max_connections=10
-# )
-
-# async def get_cached_or_search(cache_key, search_fn, ttl=300):
-
-#     cached = await redis_client.get(cache_key)
-#     if cached:
-#         return f"(cached)\n{cached}"
-
-
-#     result = await search_fn()
-
-#     await redis_client.set(cache_key, result, ex=ttl)
-#     return result
+from tools.my_estimate_task import register_estimate_task
 
 
 mcp = FastMCP("Company Assistant")
@@ -75,6 +52,7 @@ register_late_arrival_requests(mcp)
 register_manual_hour_requests(mcp)
 register_my_late_come_requests(mcp)
 register_timesheet_summary_tool(mcp)
+register_estimate_task(mcp)
 embeddings = OllamaEmbeddings(model="nomic-embed-text")
                
 
