@@ -41,75 +41,104 @@ def register_timesheet(mcp):
         except Exception:
             return "Please use format like '19 Feb' or '19-02-2026'."
 
-        # cache_key=f"timesheet:{request_data.get('_id','')}:{final_date if final_date else ''}"
+        # ✅ Month normalization
+        month_number = None
+        if month:
+            try:
+                month = month.strip()
+                try:
+                    month_number = datetime.strptime(month, "%B").month
+                except:
+                    month_number = datetime.strptime(month, "%b").month
+            except:
+                return "Please provide month in format like 'February' or 'Feb'."
+
         if final_date:
             dt = datetime.strptime(final_date, "%d-%m-%Y")
 
-        # async def search():
-            index=0
-            data=[]
-            while True:
-                TIMESHEET_API_URL = f"https://api.portal.chicmicstudios.in/v1/timesheet/history?index={index}&limit=10"
-                
-                headers = {
-                    "Authorization": auth_token,
-                    "Content-Type": "application/json"
-                }
+        index=0
+        data=[]
+        while True:
+            TIMESHEET_API_URL = f"https://api.portal.chicmicstudios.in/v1/timesheet/history?index={index}&limit=10"
+            
+            headers = {
+                "Authorization": auth_token,
+                "Content-Type": "application/json"
+            }
 
-                async with httpx.AsyncClient() as client:
-                    try:
-                        response = await client.get(TIMESHEET_API_URL, headers=headers) 
-                        if response.status_code == 200:
-                            batch=response.json().get('data',{}).get('data',[])
-                            if not batch:
-                                break
-                            data.extend(batch)
-                        else:
-                            return f"The api returned status code: {response.status_code}"
-                    except Exception as e:
-                        return f"Error while connecting to api: {str(e)}"
-                index+=10
-
-
-            pending_timesheet=0
-            for timesheet in data:
-                if timesheet.get('timesheetStatus','')==1:
-                    pending_timesheet+=1
-
-            if date and final_date:
-                matched_leaves= "\n".join([
-                    f"(- Date of the timesheet: {datetime.strptime(timesheet.get('entryDate'), '%Y-%m-%d').strftime('%d-%m-%Y')} or {'today' if datetime.today()==datetime.strptime(timesheet.get('entryDate'), '%Y-%m-%d') else datetime.strptime(timesheet.get('entryDate'), '%Y-%m-%d').strftime('%d-%B-%Y')} or {datetime.strptime(timesheet.get('entryDate'), '%Y-%m-%d').strftime('%d-%B')}\n"
-                    f"- Time Spent on the timesheet: {timesheet.get('timeSpent')}\n"
-                    f"- Projects included in timesheet: {timesheet.get('projects')}\n"
-                    # f"- Upwork Status: {'Approved' if timesheet.get('upworkStatus')==2 else 'Pending'}\n"
-                    f"- This timesheet is submitted and {'Approved' if timesheet.get('timesheetStatus')==2 else 'Pending'} (This is status of timesheet)\n"
-                    f"- This timesheet is filled/submitted by you ({timesheet.get('userName')}) having employee id : {timesheet.get('employeeId')})"
-                    for timesheet in data if datetime.strptime(timesheet.get('entryDate'), '%Y-%m-%d').strftime('%d-%m-%Y')==final_date
-                ])
-                if matched_leaves:
-                    return matched_leaves
-                return f"No timesheet is filled for date: {final_date}"
+            async with httpx.AsyncClient() as client:
+                try:
+                    response = await client.get(TIMESHEET_API_URL, headers=headers) 
+                    if response.status_code == 200:
+                        batch=response.json().get('data',{}).get('data',[])
+                        if not batch:
+                            break
+                        data.extend(batch)
+                    else:
+                        return f"The api returned status code: {response.status_code}"
+                except Exception as e:
+                    return f"Error while connecting to api: {str(e)}"
+            index+=10
 
 
-            result=f"You have {pending_timesheet} pending timesheets and remaining are approved.\nDetails of your pending timesheets are:\n"
-            result+= "\n\n".join([
+        pending_timesheet=0
+        for timesheet in data:
+            if timesheet.get('timesheetStatus','')==1:
+                pending_timesheet+=1
+
+
+        # ✅ DATE FILTER
+        if date and final_date:
+            matched_leaves= "\n".join([
                 f"(- Date of the timesheet: {datetime.strptime(timesheet.get('entryDate'), '%Y-%m-%d').strftime('%d-%m-%Y')} or {'today' if datetime.today()==datetime.strptime(timesheet.get('entryDate'), '%Y-%m-%d') else datetime.strptime(timesheet.get('entryDate'), '%Y-%m-%d').strftime('%d-%B-%Y')} or {datetime.strptime(timesheet.get('entryDate'), '%Y-%m-%d').strftime('%d-%B')}\n"
                 f"- Time Spent on the timesheet: {timesheet.get('timeSpent')}\n"
                 f"- Projects included in timesheet: {timesheet.get('projects')}\n"
-                # f"- Upwork Status: {'Approved' if timesheet.get('upworkStatus')==2 else 'Pending'}\n"
                 f"- This timesheet is submitted and {'Approved' if timesheet.get('timesheetStatus')==2 else 'Pending'} (This is status of timesheet)\n"
                 f"- This timesheet is filled/submitted by you ({timesheet.get('userName')}) having employee id : {timesheet.get('employeeId')})"
-                for timesheet in data if timesheet.get('timesheetStatus')==1
+                for timesheet in data if datetime.strptime(timesheet.get('entryDate'), '%Y-%m-%d').strftime('%d-%m-%Y')==final_date
             ])
+            if matched_leaves:
+                return matched_leaves
+            return f"No timesheet is filled for date: {final_date}"
 
-            result+="\n\nDetails of your approved timesheets are:\n"
-            result+= "\n\n".join([
-                f"(- Date of the timesheet: {datetime.strptime(timesheet.get('entryDate'), '%Y-%m-%d').strftime('%d-%m-%Y')} or {'today' if datetime.strptime(timesheet.get('entryDate'), '%Y-%m-%d')==datetime.today().strftime('%Y-%m-%d') else datetime.strptime(timesheet.get('entryDate'), '%Y-%m-%d').strftime('%d-%B-%Y')} or {datetime.strptime(timesheet.get('entryDate'), '%Y-%m-%d').strftime('%d-%B')}\n"
+
+        # ✅ MONTH FILTER (ONLY if month provided and date not provided)
+        if month_number and not date:
+            month_records = [
+                timesheet for timesheet in data
+                if datetime.strptime(timesheet.get('entryDate'), '%Y-%m-%d').month == month_number
+            ]
+
+            if not month_records:
+                return f"No timesheet records found for month: {month}"
+
+            return "\n\n".join([
+                f"(- Date of the timesheet: {datetime.strptime(timesheet.get('entryDate'), '%Y-%m-%d').strftime('%d-%m-%Y')} or {datetime.strptime(timesheet.get('entryDate'), '%Y-%m-%d').strftime('%d-%B-%Y')} or {datetime.strptime(timesheet.get('entryDate'), '%Y-%m-%d').strftime('%d-%B')}\n"
                 f"- Time Spent on the timesheet: {timesheet.get('timeSpent')}\n"
                 f"- Projects included in timesheet: {timesheet.get('projects')}\n"
-                # f"- Upwork Status: {'Approved' if timesheet.get('upworkStatus')==2 else 'Pending'}\n"
                 f"- This timesheet is submitted and {'Approved' if timesheet.get('timesheetStatus')==2 else 'Pending'} (This is status of timesheet)\n"
                 f"- This timesheet is filled/submitted by you ({timesheet.get('userName')}) having employee id : {timesheet.get('employeeId')})"
-                for timesheet in data if timesheet.get('timesheetStatus')==2
+                for timesheet in month_records
             ])
-            return result
+
+
+        result=f"You have {pending_timesheet} pending timesheets and remaining are approved.\nDetails of your pending timesheets are:\n"
+        result+= "\n\n".join([
+            f"(- Date of the timesheet: {datetime.strptime(timesheet.get('entryDate'), '%Y-%m-%d').strftime('%d-%m-%Y')} or {'today' if datetime.today()==datetime.strptime(timesheet.get('entryDate'), '%Y-%m-%d') else datetime.strptime(timesheet.get('entryDate'), '%Y-%m-%d').strftime('%d-%B-%Y')} or {datetime.strptime(timesheet.get('entryDate'), '%Y-%m-%d').strftime('%d-%B')}\n"
+            f"- Time Spent on the timesheet: {timesheet.get('timeSpent')}\n"
+            f"- Projects included in timesheet: {timesheet.get('projects')}\n"
+            f"- This timesheet is submitted and {'Approved' if timesheet.get('timesheetStatus')==2 else 'Pending'} (This is status of timesheet)\n"
+            f"- This timesheet is filled/submitted by you ({timesheet.get('userName')}) having employee id : {timesheet.get('employeeId')})"
+            for timesheet in data if timesheet.get('timesheetStatus')==1
+        ])
+
+        result+="\n\nDetails of your approved timesheets are:\n"
+        result+= "\n\n".join([
+            f"(- Date of the timesheet: {datetime.strptime(timesheet.get('entryDate'), '%Y-%m-%d').strftime('%d-%m-%Y')} or {'today' if datetime.strptime(timesheet.get('entryDate'), '%Y-%m-%d')==datetime.today().strftime('%Y-%m-%d') else datetime.strptime(timesheet.get('entryDate'), '%Y-%m-%d').strftime('%d-%B-%Y')} or {datetime.strptime(timesheet.get('entryDate'), '%Y-%m-%d').strftime('%d-%B')}\n"
+            f"- Time Spent on the timesheet: {timesheet.get('timeSpent')}\n"
+            f"- Projects included in timesheet: {timesheet.get('projects')}\n"
+            f"- This timesheet is submitted and {'Approved' if timesheet.get('timesheetStatus')==2 else 'Pending'} (This is status of timesheet)\n"
+            f"- This timesheet is filled/submitted by you ({timesheet.get('userName')}) having employee id : {timesheet.get('employeeId')})"
+            for timesheet in data if timesheet.get('timesheetStatus')==2
+        ])
+        return result
