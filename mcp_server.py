@@ -32,6 +32,14 @@ from tools.it_assets import register_asset_list
 from tools.awards import register_award_list
 from tools.recruitment_status import register_recruitment_report
 from tools.screening_request import register_screening_request
+from tools.all_users import register_organisation_users
+from tools.human_resources import register_manage_resource
+from tools.manage_roles import register_management_roles
+from tools.management_designation import register_management_designations
+from tools.management_permission import register_management_permission
+from tools.management_skill import register_management_skills
+from tools.project_approval import register_approval_project_list
+from tools.upwork_list import register_management_upwork_ids
 from tools.wfh_employees import register_wfh_list
 from tools.relexation import register_relaxation_sheet
 from tools.campus_placement import register_campus_placement_list
@@ -75,6 +83,14 @@ register_relaxation_sheet(mcp)
 register_campus_placement_list(mcp)
 register_training_course(mcp)
 register_training_trainee_list(mcp)
+register_organisation_users(mcp)
+register_manage_resource(mcp)
+register_management_roles(mcp)
+register_management_designations(mcp)
+register_management_skills(mcp)
+register_management_permission(mcp)
+register_approval_project_list(mcp)
+register_management_upwork_ids(mcp)
 embeddings = OllamaEmbeddings(model="nomic-embed-text")
                
 
