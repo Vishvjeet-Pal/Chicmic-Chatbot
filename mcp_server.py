@@ -40,6 +40,7 @@ from tools.management_permission import register_management_permission
 from tools.management_skill import register_management_skills
 from tools.project_approval import register_approval_project_list
 from tools.upwork_list import register_management_upwork_ids
+from tools.in_out_others import register_in_out_others
 from tools.wfh_employees import register_wfh_list
 from tools.relexation import register_relaxation_sheet
 from tools.campus_placement import register_campus_placement_list
@@ -89,6 +90,10 @@ register_management_roles(mcp)
 register_management_designations(mcp)
 register_management_skills(mcp)
 register_management_permission(mcp)
+register_management_skills(mcp)
+register_management_roles(mcp)
+register_organisation_users(mcp)
+register_in_out_others(mcp)
 register_approval_project_list(mcp)
 register_management_upwork_ids(mcp)
 embeddings = OllamaEmbeddings(model="nomic-embed-text")
