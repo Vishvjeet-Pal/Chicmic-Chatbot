@@ -17,7 +17,7 @@ Filters:
 - status: vacant / occupied
         """
 
-        MANAGE_RESOURCE_API_URL = "https://api.portal.chicmicstudios.in/v1/project/manage/resource"
+        MANAGE_RESOURCE_API_URL = "https://erp-staging.projectlabs.in/v1/task/vacantResource"
 
         headers = {
             "Authorization": auth_token,

@@ -18,25 +18,27 @@ Filters:
 - search: filter by employee name or email
         """
 
-        PERMISSION_API_URL = "https://api.portal.chicmicstudios.in/v1/management/permission"
-
         headers = {
             "Authorization": auth_token,
             "Content-Type": "application/json"
         }
 
         index = 0
-        limit = 10
+        limit = 10   # ✅ static
         all_employees = []
 
         async with httpx.AsyncClient() as client:
             try:
-                # 🔁 Pagination
+                # 🔁 Pagination Loop
                 while True:
-                    response = await client.post(
+
+                    PERMISSION_API_URL = (
+                        f"https://erp-staging.projectlabs.in/v1/permission?index={index}&limit={limit}"
+                    )
+
+                    response = await client.get(
                         PERMISSION_API_URL,
-                        headers=headers,
-                        json={"index": index, "limit": limit}
+                        headers=headers
                     )
 
                     if response.status_code == 401:
@@ -50,10 +52,13 @@ Filters:
 
                     batch = response.json().get("data", {}).get("data", [])
 
+                    # 🛑 Stop when no more records
                     if not batch:
                         break
 
                     all_employees.extend(batch)
+
+                    # ✅ Increase index dynamically
                     index += limit
 
                 if not all_employees:

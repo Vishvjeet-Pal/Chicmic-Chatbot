@@ -16,31 +16,55 @@ Use this tool when user asks about:
 
 Filters:
 - status: active / inactive
-        """
 
-        DESIGNATION_API_URL = "https://api.portal.chicmicstudios.in/v1/management/designations"
+Pagination:
+- Auto fetches all records (index dynamic, limit static = 10)
+        """
 
         headers = {
             "Authorization": auth_token,
             "Content-Type": "application/json"
         }
 
+        index = 0
+        limit = 10   # ✅ Static
+        all_designations = []
+
         async with httpx.AsyncClient() as client:
             try:
-                response = await client.get(DESIGNATION_API_URL, headers=headers)
+                # 🔁 Pagination loop
+                while True:
 
-                if response.status_code == 401:
-                    return "Unauthorized access. Please login again."
+                    DESIGNATION_API_URL = (
+                        f"https://erp-staging.projectlabs.in/v1/designation?index={index}&limit={limit}"
+                    )
 
-                if response.status_code == 403:
-                    return "You are not authorized to access this information."
+                    response = await client.get(
+                        DESIGNATION_API_URL,
+                        headers=headers
+                    )
 
-                if response.status_code != 200:
-                    return f"Error: Received {response.status_code} from API."
+                    if response.status_code == 401:
+                        return "Unauthorized access. Please login again."
 
-                designations = response.json().get("data", {}).get("items", [])
+                    if response.status_code == 403:
+                        return "You are not authorized to access this information."
 
-                if not designations:
+                    if response.status_code != 200:
+                        return f"Error: Received {response.status_code} from API."
+
+                    batch = response.json().get("data", {}).get("items", [])
+
+                    # 🛑 Stop when no more data
+                    if not batch:
+                        break
+
+                    all_designations.extend(batch)
+
+                    # ✅ Increase index dynamically
+                    index += limit
+
+                if not all_designations:
                     return "No designations found."
 
                 valid_status_map = {
@@ -51,7 +75,7 @@ Filters:
                 status = status.strip().lower()
                 formatted_output = []
 
-                for des in designations:
+                for des in all_designations:
 
                     is_active = des.get("isActive", False)
 
@@ -70,12 +94,20 @@ Filters:
                     formatted_updated = "N/A"
 
                     if created_at:
-                        parsed_created = datetime.fromisoformat(created_at.replace("Z", "+00:00"))
-                        formatted_created = parsed_created.strftime("%d-%m-%Y %I:%M %p")
+                        parsed_created = datetime.fromisoformat(
+                            created_at.replace("Z", "+00:00")
+                        )
+                        formatted_created = parsed_created.strftime(
+                            "%d-%m-%Y %I:%M %p"
+                        )
 
                     if updated_at:
-                        parsed_updated = datetime.fromisoformat(updated_at.replace("Z", "+00:00"))
-                        formatted_updated = parsed_updated.strftime("%d-%m-%Y %I:%M %p")
+                        parsed_updated = datetime.fromisoformat(
+                            updated_at.replace("Z", "+00:00")
+                        )
+                        formatted_updated = parsed_updated.strftime(
+                            "%d-%m-%Y %I:%M %p"
+                        )
 
                     formatted_output.append(
                         f"Designation Name: {des.get('name')}\n"

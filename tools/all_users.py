@@ -18,7 +18,7 @@ def register_organisation_users(mcp):
     ):
         """
 
-         Use this tool when the user asks about:
+        Use this tool when the user asks about:
         - Organisation users list
         - Employee directory
         - List of employees
@@ -29,36 +29,44 @@ def register_organisation_users(mcp):
         - Employees who joined between specific dates
         - Paginated employee list
 
-         Pagination:
+        Pagination:
         - index → Page index (default: 0)
-        - limit → Number of records per page (default: 10)
+        - limit → Records per page (default: 10)
 
-         Supported Filters:
-        - name → Filter by employee full name
-        - team → Filter by team name
-        - role → Filter by role (e.g., IND, ADMIN)
-        - active → true / false
-        - verification_status → Verified / Un-Verified
-        - from_date → Joining date from (YYYY-MM-DD)
-        - to_date → Joining date to (YYYY-MM-DD)
-
-         Date Format:
-        All date filters must be provided in YYYY-MM-DD format.
-
-         Returns:
-        - Total user count (from API)
-        - Filtered user count
-        - Detailed formatted user list
+        Filters:
+        - name
+        - team
+        - role
+        - active (true/false)
+        - verification_status
+        - from_date (YYYY-MM-DD)
+        - to_date (YYYY-MM-DD)
         """
 
-        url = f"https://erp-staging.projectlabs.in/v1/organisation/users?index={index}&limit={limit}"
+        url = "https://erp-staging.projectlabs.in/v1/user/list"
 
         headers = {
-            "Authorization": auth_token
+            "Authorization": auth_token,
+            "Content-Type": "application/json"
+        }
+
+        body = {
+            "index": index,
+            "limit": limit
         }
 
         async with httpx.AsyncClient() as client:
-            response = await client.get(url, headers=headers)
+            response = await client.post(
+                url,
+                headers=headers,
+                json=body
+            )
+
+        if response.status_code == 401:
+            return "Unauthorized access. Please login again."
+
+        if response.status_code == 403:
+            return "You are not authorized to access this information."
 
         if response.status_code != 200:
             return f"Failed to fetch users. Status Code: {response.status_code}"
@@ -81,7 +89,7 @@ def register_organisation_users(mcp):
             verification = user.get("verificationStatus", "")
             joining_date_raw = user.get("joiningDate", "")
 
-            # Date conversion
+            # ---- Date conversion ----
             joining_date_obj = None
             if joining_date_raw:
                 try:
@@ -124,28 +132,33 @@ def register_organisation_users(mcp):
 
         for idx, user in enumerate(filtered_users, start=1):
 
-            name = user.get("employeeFullName", "N/A")
+            name_val = user.get("employeeFullName", "N/A")
             email = user.get("officialEmail", "N/A")
-            role = user.get("role", "N/A")
+            role_val = user.get("role", "N/A")
             designation = user.get("designation", {}).get("name", "N/A")
             team_names = user.get("teamNames", "No Team")
             active_status = "Active" if user.get("active") else "Inactive"
             verification = user.get("verificationStatus", "N/A")
-            joining_date = user.get("joiningDate", "")
+            joining_date_raw = user.get("joiningDate", "")
 
-            if joining_date:
+            formatted_joining_date = "N/A"
+
+            if joining_date_raw:
                 try:
-                    joining_date = datetime.fromisoformat(joining_date.replace("Z", "")).strftime("%d-%m-%Y")
+                    date_obj = datetime.fromisoformat(
+                        joining_date_raw.replace("Z", "")
+                    )
+                    formatted_joining_date = date_obj.strftime("%d-%m-%Y")
                 except:
                     pass
 
             formatted_response.append(
-                f"{idx}. {name}\n"
+                f"{idx}. {name_val}\n"
                 f"   Email: {email}\n"
-                f"   Role: {role}\n"
+                f"   Role: {role_val}\n"
                 f"   Designation: {designation}\n"
                 f"   Team: {team_names}\n"
-                f"   Joining Date: {joining_date} or {datetime.fromisoformat(joining_date.replace("Z", "")).strftime("%d-%B-%Y")}  or {datetime.fromisoformat(joining_date.replace("Z", "")).strftime("%d-%b-%Y")}\n"
+                f"   Joining Date: {formatted_joining_date}\n"
                 f"   Status: {active_status}\n"
                 f"   Verification: {verification}"
             )
