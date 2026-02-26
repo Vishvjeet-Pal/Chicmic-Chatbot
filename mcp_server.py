@@ -49,6 +49,13 @@ from tools.trainee_list import register_training_trainee_list
 from tools.leave_sheet import register_leave_sheet
 from tools.resignations import register_resignations
 from tools.blacklisted_clients import register_blacklisted_clients
+from tools.session_list import register_training_session_list
+from tools.trainee_test import register_training_test_list
+from tools.trainee_sample import register_training_sample_code
+from tools.trainee_feedback import register_training_feedback_history
+from tools.sales_direct_msg import register_sales_direct_messages
+from tools.sales_bids import register_sales_bid_list
+from tools.sales_estimate_list import register_sales_estimate_list
 mcp = FastMCP("Company Assistant")
 
 register_user_profile(mcp)
@@ -102,6 +109,13 @@ register_management_upwork_ids(mcp)
 register_leave_sheet(mcp)
 register_resignations(mcp)
 register_blacklisted_clients(mcp)
+register_training_session_list(mcp)
+register_training_test_list(mcp)
+register_training_sample_code(mcp)
+register_training_feedback_history(mcp)
+register_sales_direct_messages(mcp)
+register_sales_bid_list(mcp)
+register_sales_estimate_list(mcp)
 embeddings = OllamaEmbeddings(model="nomic-embed-text")
                
 
