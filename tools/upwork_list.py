@@ -18,7 +18,7 @@ Filters:
 - search: filter by email or username
         """
 
-        UPWORK_ID_API_URL = "https://api.portal.chicmicstudios.in/v1/management/upwork-id-list"
+        UPWORK_ID_API_URL = "https://erp-staging.projectlabs.in/v1/hours/upworkEmails"
 
         headers = {
             "Authorization": auth_token,

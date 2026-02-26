@@ -18,7 +18,7 @@ Filters:
 - status: pending / approved / rejected
         """
 
-        APPROVAL_PROJECT_API_URL = "https://api.portal.chicmicstudios.in/v1/projects/approval/list"
+        APPROVAL_PROJECT_API_URL = "https://erp-staging.projectlabs.in/v1/project/projectRequests/list"
 
         headers = {
             "Authorization": auth_token,
