@@ -50,37 +50,53 @@ def register_organisation_users(mcp):
             "Content-Type": "application/json"
         }
 
-        body = {
-            "index": index,
-            "limit": limit
-        }
+        all_items = []
+        current_index = 0
+        page_limit = limit
 
         async with httpx.AsyncClient() as client:
-            response = await client.post(
-                url,
-                headers=headers,
-                json=body
-            )
 
-        if response.status_code == 401:
-            return "Unauthorized access. Please login again."
+            while True:
 
-        if response.status_code == 403:
-            return "You are not authorized to access this information."
+                body = {
+                    "index": current_index,
+                    "limit": page_limit
+                }
 
-        if response.status_code != 200:
-            return f"Failed to fetch users. Status Code: {response.status_code}"
+                response = await client.post(
+                    url,
+                    headers=headers,
+                    json=body
+                )
 
-        response_json = response.json()
-        items = response_json.get("data", {}).get("items", [])
-        total_count = response_json.get("data", {}).get("totalCount", 0)
+                if response.status_code == 401:
+                    return "Unauthorized access. Please login again."
 
-        if not items:
+                if response.status_code == 403:
+                    return "You are not authorized to access this information."
+
+                if response.status_code != 200:
+                    return f"Failed to fetch users. Status Code: {response.status_code}"
+
+                response_json = response.json()
+                items = response_json.get("data", {}).get("items", [])
+                total_count = response_json.get("data", {}).get("totalCount", 0)
+
+                if not items:
+                    break
+
+                all_items.extend(items)
+                current_index += page_limit
+
+                if len(all_items) >= total_count:
+                    break
+
+        if not all_items:
             return "No users found."
 
         filtered_users = []
 
-        for user in items:
+        for user in all_items:
 
             employee_name = user.get("employeeFullName", "")
             team_names = user.get("teamNames", "")
@@ -89,7 +105,6 @@ def register_organisation_users(mcp):
             verification = user.get("verificationStatus", "")
             joining_date_raw = user.get("joiningDate", "")
 
-            # ---- Date conversion ----
             joining_date_obj = None
             if joining_date_raw:
                 try:
@@ -99,7 +114,6 @@ def register_organisation_users(mcp):
                 except:
                     pass
 
-            # ---- Filtering ----
             if name and name.lower() not in employee_name.lower():
                 continue
 
@@ -164,7 +178,7 @@ def register_organisation_users(mcp):
             )
 
         return (
-            f"Total Users (API): {total_count}\n"
+            f"Total Users (API): {len(all_items)}\n"
             f"Filtered Users: {len(filtered_users)}\n\n"
             + "\n\n".join(formatted_response)
         )

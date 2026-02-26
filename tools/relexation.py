@@ -20,6 +20,8 @@ def register_relaxation_sheet(mcp):
         - etc.
 
         Internally mapped to 1–12
+
+        Now fetches ALL records dynamically.
         """
 
         url = "https://erp-staging.projectlabs.in/v1/timesheet/relaxationSheet"
@@ -47,39 +49,60 @@ def register_relaxation_sheet(mcp):
 
         mapped_month = str(month_map[month_key])
 
-        payload = {
-            "index": int(index),
-            "limit": int(limit),
-            "month": mapped_month,
-            "year": int(year)
-        }
-
         headers = {
             "Authorization": auth_token,
             "Content-Type": "application/json"
         }
 
+        all_employees = []
+        current_index = int(index)
+
         async with httpx.AsyncClient() as client:
-            response = await client.post(url, headers=headers, json=payload)
+            while True:
 
-        if response.status_code != 200:
-            return f"Error {response.status_code}: {response.text}"
+                payload = {
+                    "index": current_index,
+                    "limit": int(limit),
+                    "month": mapped_month,
+                    "year": int(year)
+                }
 
-        response_json = response.json()
-        employees = response_json.get("data", {}).get("data", [])
-        total_count = response_json.get("data", {}).get("count", 0)
+                response = await client.post(url, headers=headers, json=payload)
 
-        if not employees:
+                if response.status_code == 401:
+                    return "Unauthorized access. Please login again."
+
+                if response.status_code == 403:
+                    return "You are not authorized to access this information."
+
+                if response.status_code != 200:
+                    return f"Error {response.status_code}: {response.text}"
+
+                response_json = response.json()
+                batch = response_json.get("data", {}).get("data", [])
+                total_count = response_json.get("data", {}).get("count", 0)
+
+                if not batch:
+                    break
+
+                all_employees.extend(batch)
+
+                # Stop if all records fetched
+                if len(all_employees) >= total_count:
+                    break
+
+                current_index += int(limit)  # 🔥 Increase dynamically
+
+        if not all_employees:
             return "No relaxation sheet data found for this month."
 
         formatted_output = []
 
-        for idx, emp in enumerate(employees, start=1):
+        for idx, emp in enumerate(all_employees, start=1):
 
             total_hours_seconds = emp.get("totalHours", 0)
             total_hours = round(total_hours_seconds / 3600, 2)
 
-            # 📅 Created Date Formatting
             created_at = emp.get("createdAt")
             formatted_created = "N/A"
 
@@ -105,6 +128,7 @@ def register_relaxation_sheet(mcp):
 
         return (
             f"Month: {month.capitalize()} {year}\n"
-            f"Total Records: {total_count}\n\n"
+            f"Total Records (API): {total_count}\n"
+            f"Fetched Records: {len(all_employees)}\n\n"
             + "\n\n".join(formatted_output)
         )

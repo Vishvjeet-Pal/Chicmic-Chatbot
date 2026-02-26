@@ -4,8 +4,6 @@ def register_blacklisted_clients(mcp):
     @mcp.tool()
     async def blacklisted_clients(
         auth_token,
-        index=0,
-        limit=10,
         client_name="",
         country_name="",
         min_hired_ratio="",
@@ -15,35 +13,16 @@ def register_blacklisted_clients(mcp):
         """
         This tool retrieves the list of blacklisted clients from the ERP system.
 
-Use this tool when the user asks about:
-- Blacklisted clients
-- Restricted clients
-- Clients with low hire ratio
-- Risky clients
-- Client blacklist report
-- Country-wise blacklisted clients
-- Spending details of blacklisted clients
+        Use this tool when the user asks about:
+        - Blacklisted clients
+        - Restricted clients
+        - Clients with low hire ratio
+        - Risky clients
+        - Client blacklist report
+        - Country-wise blacklisted clients
+        - Spending details of blacklisted clients
 
-The tool returns formatted blacklisted client data containing:
-
-- Client Name
-- Country
-- Blacklisted Date
-- Hired Ratio
-- Total Jobs Posted
-- Total Amount Spent
-- Created By
-- Updated By
-
-        args:
-        - auth_token: Authentication token for API access.
-        - index: Pagination index (default 0).
-        - limit: Pagination limit (default 10).
-        - client_name: (Optional) Filter by client name.
-        - country_name: (Optional) Filter by country name.
-        - min_hired_ratio: (Optional) Minimum hired ratio filter.
-        - min_total_jobs: (Optional) Minimum total jobs posted filter.
-        - min_amount_spent: (Optional) Minimum total amount spent filter.
+        Returns formatted blacklisted client data.
         """
 
         BLACKLIST_API_URL = "https://erp-staging.projectlabs.in/v1/bid/blacklistedClient"
@@ -53,40 +32,55 @@ The tool returns formatted blacklisted client data containing:
             "Content-Type": "application/json"
         }
 
-        params = {
-            "index": index,
-            "limit": limit
-        }
+        index = 0
+        limit = 10
+        all_clients = []
+        total_count = None
 
         async with httpx.AsyncClient() as client:
             try:
-                response = await client.get(
-                    BLACKLIST_API_URL,
-                    headers=headers,
-                    params=params
-                )
+                while True:
 
-                if response.status_code == 401:
-                    return "Unauthorized access. Please login again."
+                    response = await client.get(
+                        BLACKLIST_API_URL,
+                        headers=headers,
+                        params={"index": index, "limit": limit}
+                    )
 
-                if response.status_code == 403:
-                    return "You are not authorized to access this information."
+                    if response.status_code == 401:
+                        return "Unauthorized access. Please login again."
 
-                if response.status_code != 200:
-                    return f"Error: Received {response.status_code} from API."
+                    if response.status_code == 403:
+                        return "You are not authorized to access this information."
 
-                response_json = response.json()
-                clients = response_json.get("data", {}).get("data", [])
-                total_count = response_json.get("data", {}).get("totalCount", 0)
+                    if response.status_code != 200:
+                        return f"Error: Received {response.status_code} from API."
 
-                if not clients:
+                    response_json = response.json()
+                    data_section = response_json.get("data", {})
+
+                    batch = data_section.get("data", [])
+                    total_count = data_section.get("totalCount", 0)
+
+                    if not batch:
+                        break
+
+                    all_clients.extend(batch)
+
+                    # 🔥 Stop when all records fetched
+                    if len(all_clients) >= total_count:
+                        break
+
+                    index += limit  # 🔁 Increase index dynamically
+
+                if not all_clients:
                     return "No blacklisted clients found."
 
                 formatted_records = []
 
-                for client_data in clients:
+                for client_data in all_clients:
 
-                    # Filtering
+                    # ---- Filtering ----
                     if client_name and client_name.lower() not in (client_data.get("clientName") or "").lower():
                         continue
 
@@ -114,11 +108,12 @@ The tool returns formatted blacklisted client data containing:
                     )
 
                 if not formatted_records:
-                    return "No blacklisted clients found."
+                    return "No blacklisted clients matched the given filters."
 
                 return (
-                    f"Total Blacklisted Clients Count: {total_count}\n\n" +
-                    "\n\n".join(formatted_records)
+                    f"Total Blacklisted Clients (API): {total_count}\n"
+                    f"Filtered Clients: {len(formatted_records)}\n\n"
+                    + "\n\n".join(formatted_records)
                 )
 
             except httpx.RequestError as e:

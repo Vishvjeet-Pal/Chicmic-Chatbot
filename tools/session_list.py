@@ -1,66 +1,68 @@
 import httpx
+from datetime import datetime
 
 def register_training_session_list(mcp):
 
     @mcp.tool()
     async def get_training_session_list(
         auth_token: str,
-        index: int = 0,
         limit: int = 10
     ):
         """
-        This tool fetches the list of training sessions.
+        Retrieves all training sessions with automatic pagination.
+
+        Features:
+        - Automatic pagination using while loop
+        - Fetches all sessions
+        - Formats session details cleanly
 
         Use this tool when user asks about:
         - Training session list
-        - Training sessions
-        - Session details
         - Upcoming or past sessions
         - Session status
         - Training module sessions
-
-        Required:
-        - auth_token (User authentication token)
-
-        Optional:
-        - index (default: 0)
-        - limit (default: 10)
-
-        Returns:
-        - Session title
-        - Date & time
-        - Location
-        - Approval status
-        - Created date
-        - MOM (Minutes of Meeting)
         """
 
-        url = f"https://erp-staging.projectlabs.in/v1/training/session?index={index}&limit={limit}"
+        base_url = "https://erp-staging.projectlabs.in/v1/training/session"
+        index = 0
+        all_sessions = []
 
         headers = {
             "Authorization": auth_token
         }
 
         async with httpx.AsyncClient(timeout=30.0) as client:
-            response = await client.get(url, headers=headers)
 
-        if response.status_code != 200:
-            return f"Failed to fetch session list. Status Code: {response.status_code}"
+            while True:
+                url = f"{base_url}?index={index}&limit={limit}"
+                response = await client.get(url, headers=headers)
 
-        result = response.json()
+                if response.status_code != 200:
+                    return f"Failed to fetch session list. Status Code: {response.status_code}"
 
-        if not result.get("success"):
-            return "API returned unsuccessful response."
+                result = response.json()
 
-        sessions = result.get("data", [])
-        total_count = result.get("count", 0)
+                if not result.get("success"):
+                    return "API returned unsuccessful response."
 
-        if not sessions:
+                sessions = result.get("data", [])
+                total_count = result.get("count", 0)
+
+                if not sessions:
+                    break
+
+                all_sessions.extend(sessions)
+                index += limit
+
+                if len(all_sessions) >= total_count:
+                    break
+
+        if not all_sessions:
             return "No training sessions found."
 
+        # Format output
         formatted_response = []
-
-        for session in sessions:
+        for idx, session in enumerate(all_sessions, start=1):
             title = session.get("title", "N/A")
             date = session.get("date", "N/A")
             time = session.get("time", "N/A")
@@ -69,18 +71,26 @@ def register_training_session_list(mcp):
             approved = session.get("isApproved", False)
             mom_message = session.get("mom", {}).get("message", "N/A")
 
+            # Optional: Combine date & time into readable format
+            date_time = f"{date} {time}" if date != "N/A" and time != "N/A" else "N/A"
+            try:
+                parsed = datetime.fromisoformat(date_time.replace("Z", "+00:00"))
+                date_time = parsed.strftime("%d-%B-%Y %I:%M %p")
+            except:
+                pass
+
             formatted_response.append(
-                f"Title: {title}\n"
-                f"Date: {date}\n"
-                f"Time: {time}\n"
-                f"Location: {location}\n"
-                f"Status: {status}\n"
-                f"Approved: {approved}\n"
-                f"MOM/minutes of meeting: {mom_message}\n"
-                f"{'-'*30}"
+                f"{idx}. Title: {title}\n"
+                f"   Date & Time: {date_time}\n"
+                f"   Location: {location}\n"
+                f"   Status: {status}\n"
+                f"   Approved: {'Yes' if approved else 'No'}\n"
+                f"   MOM: {mom_message}\n"
+                f"{'-'*40}"
             )
 
         return (
-            f"Total Sessions: {total_count}\n\n" +
-            "\n".join(formatted_response)
+            f"Total Sessions: {total_count}\n"
+            f"Fetched: {len(all_sessions)}\n\n"
+            + "\n".join(formatted_response)
         )

@@ -5,7 +5,6 @@ def register_training_test_list(mcp):
     @mcp.tool()
     async def get_training_test_list(
         auth_token: str,
-        index: int = 0,
         limit: int = 10
     ):
         """
@@ -24,7 +23,6 @@ def register_training_test_list(mcp):
         - auth_token (User authentication token)
 
         Optional:
-        - index (default: 0)
         - limit (default: 10)
 
         Returns:
@@ -38,32 +36,50 @@ def register_training_test_list(mcp):
         - Task & subtask details
         """
 
-        url = f"https://erp-staging.projectlabs.in/v1/training/test?index={index}&limit={limit}"
+        base_url = "https://erp-staging.projectlabs.in/v1/training/test"
 
         headers = {
             "Authorization": auth_token
         }
 
+        index = 0
+        all_tests = []
+        total_count = None
+
         async with httpx.AsyncClient(timeout=30.0) as client:
-            response = await client.get(url, headers=headers)
 
-        if response.status_code != 200:
-            return f"Failed to fetch test list. Status Code: {response.status_code}"
+            while True:
+                url = f"{base_url}?index={index}&limit={limit}"
 
-        result = response.json()
+                response = await client.get(url, headers=headers)
 
-        if not result.get("success"):
-            return "API returned unsuccessful response."
+                if response.status_code != 200:
+                    return f"Failed to fetch test list. Status Code: {response.status_code}"
 
-        tests = result.get("data", [])
-        total_count = result.get("count", 0)
+                result = response.json()
 
-        if not tests:
+                if not result.get("success"):
+                    return "API returned unsuccessful response."
+
+                tests = result.get("data", [])
+                total_count = result.get("count", 0)
+
+                if not tests:
+                    break
+
+                all_tests.extend(tests)
+
+                index += limit
+
+                if len(all_tests) >= total_count:
+                    break
+
+        if not all_tests:
             return "No training tests found."
 
         formatted_response = []
 
-        for test in tests:
+        for test in all_tests:
             test_name = test.get("testName", "N/A")
             approved = test.get("approved", False)
             created_by = test.get("createdByName", "N/A")

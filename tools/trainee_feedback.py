@@ -5,11 +5,15 @@ def register_training_feedback_history(mcp):
     @mcp.tool()
     async def get_training_feedback_history(
         auth_token: str,
-        index: int = 0,
         limit: int = 10
     ):
         """
-        This tool fetches Training Feedback History.
+        Retrieves Training Feedback History (All Pages) with automatic pagination.
+
+        Features:
+        - Automatic pagination using while loop
+        - Fetches all feedback records
+        - Preserves formatted output
 
         Use this tool when user asks about:
         - Training feedback history
@@ -17,51 +21,51 @@ def register_training_feedback_history(mcp):
         - Reviewer feedback list
         - Behavior feedback
         - Rating history of trainees
-
-        Required:
-        - auth_token
-
-        Optional:
-        - index (default: 0)
-        - limit (default: 10)
-
-        Returns:
-        - Reviewer name & team
-        - Trainee name & team
-        - Feedback type
-        - Ratings (overall, attitude, team spirit)
-        - Comment
-        - Created date
-        - Overall average rating
         """
 
-        url = f"https://erp-staging.projectlabs.in/v1/training/feedback?index={index}&limit={limit}"
+        base_url = "https://erp-staging.projectlabs.in/v1/training/feedback"
+        index = 0
+        all_feedbacks = []
+        overall_rating = 0
+        total_count = 0
 
         headers = {
             "Authorization": auth_token
         }
 
         async with httpx.AsyncClient(timeout=30.0) as client:
-            response = await client.get(url, headers=headers)
 
-        if response.status_code != 200:
-            return f"Failed to fetch feedback history. Status Code: {response.status_code}"
+            while True:
+                url = f"{base_url}?index={index}&limit={limit}"
+                response = await client.get(url, headers=headers)
 
-        result = response.json()
+                if response.status_code != 200:
+                    return f"Failed to fetch feedback history. Status Code: {response.status_code}"
 
-        if not result.get("success"):
-            return "API returned unsuccessful response."
+                result = response.json()
 
-        feedbacks = result.get("data", [])
-        total_count = result.get("count", 0)
-        overall_rating = result.get("overallRating", 0)
+                if not result.get("success"):
+                    return "API returned unsuccessful response."
 
-        if not feedbacks:
+                feedbacks = result.get("data", [])
+                total_count = result.get("count", 0)
+                overall_rating = result.get("overallRating", 0)
+
+                if not feedbacks:
+                    break
+
+                all_feedbacks.extend(feedbacks)
+                index += limit
+
+                if len(all_feedbacks) >= total_count:
+                    break
+
+        if not all_feedbacks:
             return "No feedback history found."
 
+        # Format output
         formatted_response = []
-
-        for idx, fb in enumerate(feedbacks, start=1):
+        for idx, fb in enumerate(all_feedbacks, start=1):
 
             reviewer = fb.get("reviewer", {})
             trainee = fb.get("trainee", {})
