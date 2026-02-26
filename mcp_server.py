@@ -31,6 +31,7 @@ from tools.my_it_assets import register_user_assets
 from tools.it_assets import register_asset_list
 from tools.awards import register_award_list
 from tools.recruitment_status import register_recruitment_report
+from tools.screening_request import register_screening_request
 mcp = FastMCP("Company Assistant")
 
 register_user_profile(mcp)
@@ -63,6 +64,7 @@ register_user_assets(mcp)
 register_asset_list(mcp)
 register_award_list(mcp)
 register_recruitment_report(mcp)
+register_screening_request(mcp)
 embeddings = OllamaEmbeddings(model="nomic-embed-text")
                
 
