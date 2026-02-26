@@ -69,6 +69,7 @@ If user asks about leave details of employees by specifying employee name, team,
 If user asks about manual entry hours request, hubstaff, missing biometrics request use manual_hour_requests tool.
 If user asks about late come requests of employees by specifying employee name, team, employee id, reporting manager then use late_arrival_requests tool. If no employee name, team, employee id, reporting manager is specified, then use my_late_come_requests tool to provide late come details of the user itsel.
 If user asks about timesheet of employees by specifying employee name, team, employee id, use timesheet_summary tool. If no employee name, team, employee id is mentioned use my_timesheet_search tool to provide timesheet details of the user itself.
+If user asks about manual hour request of employees by specifying employee name, employee id, use manual_hours_requests_other tool. If no employee name, employee id is mentioned use manual_hour_requests tool to provide manual hours requests of the user itself.
 """
 
 agent = None   # global
@@ -153,19 +154,19 @@ async def ask_chatbot_stream(
                 stream_mode="messages",
             ):
                 
-                yield(str(msg))
+                # yield(str(msg))
                 # Detect tool calls
-                # if hasattr(msg, "tool_calls") and msg.tool_calls:
-                #     yield f"\n[Status: Searching {msg.tool_calls[0]['name']}...]\n"
+                if hasattr(msg, "tool_calls") and msg.tool_calls:
+                    yield f"\n[Status: Searching {msg.tool_calls[0]['name']}...]\n"
                 
-                # # Yield content chunks
-                # elif (isinstance(msg,AIMessage) or isinstance(msg,AIMessageChunk)) and hasattr(msg, "content") and msg.content:
-                #     if isinstance(msg.content, str):
-                #         yield msg.content
-                #     elif isinstance(msg.content, list):
-                #         for part in msg.content:
-                #             if isinstance(part, dict) and "text" in part:
-                #                 yield part["text"]
+                # Yield content chunks
+                elif (isinstance(msg,AIMessage) or isinstance(msg,AIMessageChunk)) and hasattr(msg, "content") and msg.content:
+                    if isinstance(msg.content, str):
+                        yield msg.content
+                    elif isinstance(msg.content, list):
+                        for part in msg.content:
+                            if isinstance(part, dict) and "text" in part:
+                                yield part["text"]
 
         except asyncio.CancelledError:
             # This is triggered when the user clicks 'Stop' (AbortController)

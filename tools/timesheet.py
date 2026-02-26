@@ -41,7 +41,6 @@ def register_timesheet(mcp):
         except Exception:
             return "Please use format like '19 Feb' or '19-02-2026'."
 
-        # ✅ Month normalization
         month_number = None
         if month:
             try:
@@ -86,8 +85,6 @@ def register_timesheet(mcp):
             if timesheet.get('timesheetStatus','')==1:
                 pending_timesheet+=1
 
-
-        # ✅ DATE FILTER
         if date and final_date:
             matched_leaves= "\n".join([
                 f"(- Date of the timesheet: {datetime.strptime(timesheet.get('entryDate'), '%Y-%m-%d').strftime('%d-%m-%Y')} or {'today' if datetime.today()==datetime.strptime(timesheet.get('entryDate'), '%Y-%m-%d') else datetime.strptime(timesheet.get('entryDate'), '%Y-%m-%d').strftime('%d-%B-%Y')} or {datetime.strptime(timesheet.get('entryDate'), '%Y-%m-%d').strftime('%d-%B')}\n"
@@ -102,7 +99,6 @@ def register_timesheet(mcp):
             return f"No timesheet is filled for date: {final_date}"
 
 
-        # ✅ MONTH FILTER (ONLY if month provided and date not provided)
         if month_number and not date:
             month_records = [
                 timesheet for timesheet in data
