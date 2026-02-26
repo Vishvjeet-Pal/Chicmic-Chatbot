@@ -69,6 +69,7 @@ If user asks about leave details of employees by specifying employee name, team,
 If user asks about late come requests of employees by specifying employee name, team, employee id, reporting manager then use late_arrival_requests tool. If no employee name, team, employee id, reporting manager is specified, then use my_late_come_requests tool to provide late come details of the user itsel.
 If user asks about timesheet of employees by specifying employee name, team, employee id, use timesheet_summary tool. If no employee name, team, employee id is mentioned use my_timesheet_search tool to provide timesheet details of the user itself.
 If user asks about manual hour request of employees by specifying employee name, employee id, use manual_hours_requests_other tool. If no employee name, employee id is mentioned use manual_hour_requests tool to provide manual hours requests of the user itself.
+If user asks about it assets assigned to employees by specifying employee name, employee id, use asset_list tool. If no employee name, employee id, is provided use user assets tool for providing asset details of the current user itself.
 """
 
 agent = None   
