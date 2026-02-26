@@ -48,6 +48,7 @@ from tools.training_approved_course import register_training_course
 from tools.trainee_list import register_training_trainee_list
 from tools.leave_sheet import register_leave_sheet
 from tools.resignations import register_resignations
+from tools.blacklisted_clients import register_blacklisted_clients
 mcp = FastMCP("Company Assistant")
 
 register_user_profile(mcp)
@@ -100,6 +101,7 @@ register_approval_project_list(mcp)
 register_management_upwork_ids(mcp)
 register_leave_sheet(mcp)
 register_resignations(mcp)
+register_blacklisted_clients(mcp)
 embeddings = OllamaEmbeddings(model="nomic-embed-text")
                
 
