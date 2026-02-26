@@ -46,6 +46,7 @@ from tools.relexation import register_relaxation_sheet
 from tools.campus_placement import register_campus_placement_list
 from tools.training_approved_course import register_training_course
 from tools.trainee_list import register_training_trainee_list
+from tools.leave_sheet import register_leave_sheet
 mcp = FastMCP("Company Assistant")
 
 register_user_profile(mcp)
@@ -96,6 +97,7 @@ register_organisation_users(mcp)
 register_in_out_others(mcp)
 register_approval_project_list(mcp)
 register_management_upwork_ids(mcp)
+register_leave_sheet(mcp)
 embeddings = OllamaEmbeddings(model="nomic-embed-text")
                
 
