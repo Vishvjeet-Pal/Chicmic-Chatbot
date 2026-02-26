@@ -32,6 +32,11 @@ from tools.it_assets import register_asset_list
 from tools.awards import register_award_list
 from tools.recruitment_status import register_recruitment_report
 from tools.screening_request import register_screening_request
+from tools.wfh_employees import register_wfh_list
+from tools.relexation import register_relaxation_sheet
+from tools.campus_placement import register_campus_placement_list
+from tools.training_approved_course import register_training_course
+from tools.trainee_list import register_training_trainee_list
 mcp = FastMCP("Company Assistant")
 
 register_user_profile(mcp)
@@ -65,6 +70,11 @@ register_asset_list(mcp)
 register_award_list(mcp)
 register_recruitment_report(mcp)
 register_screening_request(mcp)
+register_wfh_list(mcp)
+register_relaxation_sheet(mcp)
+register_campus_placement_list(mcp)
+register_training_course(mcp)
+register_training_trainee_list(mcp)
 embeddings = OllamaEmbeddings(model="nomic-embed-text")
                
 
