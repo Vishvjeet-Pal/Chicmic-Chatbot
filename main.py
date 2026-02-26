@@ -66,13 +66,12 @@ Use my_timesheet_search tool when user asks about timesheet details
 Use get_daily_attendance tool when user asks about ATTENDANCE, ABSENT/PRESENT STATUS, leave deduction
 Use get_user_leaves if user asks about its own leaves and leave_application tool if user asks about other employees leaves.
 If user asks about leave details of employees by specifying employee name, team, employee id, reporting manager, leave type, reason, date or status, use leave_application tool to get the details. If no employee name, team, employee id, reporting manager, leave type, reason, date or status is specified in user's query, then use get_user_leaves tool to get the leave details of the user itself.
-If user asks about manual entry hours request, hubstaff, missing biometrics request use manual_hour_requests tool.
 If user asks about late come requests of employees by specifying employee name, team, employee id, reporting manager then use late_arrival_requests tool. If no employee name, team, employee id, reporting manager is specified, then use my_late_come_requests tool to provide late come details of the user itsel.
 If user asks about timesheet of employees by specifying employee name, team, employee id, use timesheet_summary tool. If no employee name, team, employee id is mentioned use my_timesheet_search tool to provide timesheet details of the user itself.
 If user asks about manual hour request of employees by specifying employee name, employee id, use manual_hours_requests_other tool. If no employee name, employee id is mentioned use manual_hour_requests tool to provide manual hours requests of the user itself.
 """
 
-agent = None   # global
+agent = None   
 
 def wrap_with_auth(tool: BaseTool):
     """Middleware to inject auth_token and request_data into the tool execution."""
