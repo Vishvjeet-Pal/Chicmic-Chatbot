@@ -3,44 +3,17 @@ import httpx
 def register_leave_application(mcp):
     @mcp.tool()
     async def leave_application(auth_token, request_data, employee_name="", status=""):
-        """  
-        This tool retrieves leave application records from the ERP system.
-
-Use this tool when the user asks about:
-- Leave details of other employees
-- Leave history of other employees
-- leave applications of other employees
-- Employee leave records
-- Leave status of other employees
-- Leave for a specific year of other employees
-- Leave between specific dates of other employees
-
-The tool returns formatted leave application data containing:
-
-- Employee Name
-- Team
-- Reporting To
-- Leave Type
-- Reason
-- From Date
-- To Date
-- Total Days
-- Actual Days
-- Half Days
-- Waiver Applied
-- Waiver Dates
-- Sandwich Applied
-- Status
-- Send To
-- Mail To
-- Year
-
-        args:
-        - auth_token: The authentication token for API access. Provided in the Authorization header of the request.
-        - request_data: The request data containing necessary parameters for the API call. Provided in the body of the request.
-        - employee_name: (Optional) The name of the employee whose leave applications are to be retrieved. If not provided, it retrieves leave applications for all employees.
-        - status: [pending, approved, cancelled, rejected/dissapproved]. If no value is mentioned, return all leave application record.
         """
+Fetches leave applications of other employees.
+
+Use for queries about: employee leave history, leave status, leave between dates, or leave records by year.
+
+Filters supported:
+- employee_name
+- status (Pending/Approved/Rejected/Cancelled)
+
+Param: auth_token (required), request_data (required), others optional.
+"""
 
         LEAVE_APPLICATION_API_URL = "https://api.portal.chicmicstudios.in/v1/leave/requests"
 

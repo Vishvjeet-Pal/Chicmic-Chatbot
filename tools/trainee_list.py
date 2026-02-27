@@ -12,22 +12,18 @@ def register_training_trainee_list(mcp):
         mentor_name: str | None = None
     ):
         """
-        Retrieves Training Trainee List with pagination.
+Fetches training trainee list from ERP.
 
-        Features:
-        - Supports index & limit pagination
-        - Optional filtering by:
-            • status (int)
-            • trainee name (partial match)
-            • mentor name (partial match)
-        - Formats plan & mentor names cleanly
+Use for queries about: trainees list, employees under training, training status, assigned mentors, or training plans.
 
-        Use when user asks about:
-        - Training list
-        - Trainees list
-        - Who is under training
-        - Training status
-        """
+Filters supported:
+- status (int)
+- trainee_name (partial match)
+- mentor_name (partial match)
+- index, limit (pagination)
+
+Param: auth_token (required).
+"""
 
         base_url = "https://erp-staging.projectlabs.in/v1/training/traineeList"
         url = f"{base_url}?index={index}&limit={limit}"

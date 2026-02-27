@@ -13,38 +13,20 @@ def register_blacklisted_clients(mcp):
         min_amount_spent=""
     ):
         """
-        This tool retrieves the list of blacklisted clients from the ERP system.
+Fetches blacklisted clients list.
 
-Use this tool when the user asks about:
-- Blacklisted clients
-- Restricted clients
-- Clients with low hire ratio
-- Risky clients
-- Client blacklist report
-- Country-wise blacklisted clients
-- Spending details of blacklisted clients
+Use for queries about: blacklisted/restricted clients, risky clients, low hire ratio clients, country-wise blacklist, or spending details.
 
-The tool returns formatted blacklisted client data containing:
+Filters supported:
+- client_name
+- country_name
+- min_hired_ratio
+- min_total_jobs
+- min_amount_spent
+- index, limit (pagination)
 
-- Client Name
-- Country
-- Blacklisted Date
-- Hired Ratio
-- Total Jobs Posted
-- Total Amount Spent
-- Created By
-- Updated By
-
-        args:
-        - auth_token: Authentication token for API access.
-        - index: Pagination index (default 0).
-        - limit: Pagination limit (default 10).
-        - client_name: (Optional) Filter by client name.
-        - country_name: (Optional) Filter by country name.
-        - min_hired_ratio: (Optional) Minimum hired ratio filter.
-        - min_total_jobs: (Optional) Minimum total jobs posted filter.
-        - min_amount_spent: (Optional) Minimum total amount spent filter.
-        """
+Param: auth_token (required), others optional.
+"""
 
         BLACKLIST_API_URL = "https://erp-staging.projectlabs.in/v1/bid/blacklistedClient"
 

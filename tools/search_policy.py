@@ -4,29 +4,15 @@ def register_search_policy(mcp,vector_store):
     @mcp.tool()
     async def search_policy(query: str) -> str:
         """
-        Search and extract information from company policy documents.
-        DO NOT use this tool if user asks about LEAVE BALANCE
-        This tool retrieves accurate policy details from official company documents such as:
-        - Leave Policy (annual leave, earned leave, casual/sick leave, maternity leave, training leave, probation leave)
-        - Leave Calculation Rules (sandwich rule, pro-rata leave, 5+2 rule, leave deduction, compensatory leave)
-        - Work rules related to leave (approval process, leave during training, leave during probation)
+Searches company leave policy documents.
 
-        Use this tool when the user asks about:
-        - leave types
-        - How leave is calculated or deducted
-        - Sandwich rule or weekend/holiday leave counting
-        - Working on holidays or compensatory leave
-        - Leave during probation or training
-        - Leave approval process
-        - Any question combining leave + holidays
+Use for queries about: leave types, leave calculation rules, sandwich rule, holiday counting, compensatory leave, probation/training leave, or leave approval process.
 
-        Instructions:
-        - Extract only relevant policy information matching the user query.
-        - If multiple policies are relevant, combine them logically.
-        - If exact answer is not found, return the closest matching policy rule.
-        - If nothing relevant exists, return: "No relevant policy found."
-        - Do NOT generate information outside the documents.
-        """
+Do NOT use for leave balance queries.
+
+Returns only relevant policy text from official documents.
+If nothing matches, returns: "No relevant policy found."
+"""
 
         cache_key = f"leave_policy:{query}"
 

@@ -9,35 +9,17 @@ def register_sales_direct_messages(mcp):
         limit: int = 10
     ):
         """
-        This tool fetches Sales Direct Messages (Client List).
+Fetches sales direct message (client chat) list from ERP.
 
-        Use this tool when user asks about:
-        - Direct messages
-        - Sales client list
-        - Bid direct messages
-        - Upwork client chats
-        - Direct client conversation list
+Use for queries about: direct messages, client chats, Upwork conversations, sales client list, or bid direct messages.
 
-        Required:
-        - auth_token
+Params:
+- auth_token (required)
+- index (optional, pagination)
+- limit (optional, pagination)
 
-        Optional:
-        - index (default: 0)
-        - limit (default: 10)
-
-        Returns:
-        - Client Name
-        - Country
-        - Job Title
-        - Hire Rate
-        - Jobs Posted
-        - Total Amount Spent
-        - Room URL
-        - Upwork ID
-        - Status
-        - Created / Handled By
-        - Total Count
-        """
+Returns client details, job info, hire stats, status, handlers, and total count.
+"""
 
         url = f"https://erp-staging.projectlabs.in/v1/bid/directMessage?limit={limit}&index={index}"
 

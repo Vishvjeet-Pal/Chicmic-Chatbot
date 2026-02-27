@@ -9,30 +9,17 @@ def register_training_sample_code(mcp):
         limit: int = 10
     ):
         """
-        This tool fetches Github Sample Code list from Training Module.
+Fetches training GitHub sample code list from ERP.
 
-        Use this tool when user asks about:
-        - Training sample code
-        - Github sample projects
-        - Sample repositories
-        - Training project examples
-        - Approved / pending sample codes
+Use for queries about: training sample code, sample projects, GitHub repositories, or approved/pending training code.
 
-        Required:
-        - auth_token (User authentication token)
+Params:
+- auth_token (required)
+- index (optional, pagination)
+- limit (optional, pagination)
 
-        Optional:
-        - index (default: 0)
-        - limit (default: 10)
-
-        Returns:
-        - Project Name
-        - URL
-        - Comment
-        - Approval status
-        - Created date
-        - Total records count
-        """
+Returns project name, URL, comment, approval status, created date, and total count.
+"""
 
         url = f"https://erp-staging.projectlabs.in/v1/training/githubSample?index={index}&limit={limit}"
 

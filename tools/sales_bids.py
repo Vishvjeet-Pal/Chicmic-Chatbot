@@ -9,38 +9,17 @@ def register_sales_bid_list(mcp):
         limit: int = 10
     ):
         """
-        This tool fetches the Sales Bid List (List of Bids).
+Fetches sales bid list from ERP.
 
-        Use this tool when user asks about:
-        - Sales bids
-        - Bid list
-        - Upwork bid details
-        - Posted job bids
-        - Booked bids
-        - Bid status list
+Use for queries about: sales bids, bid list, Upwork bids, posted jobs, booked bids, or bid status.
 
-        Required:
-        - auth_token
+Params:
+- auth_token (required)
+- index (optional, pagination)
+- limit (optional, pagination)
 
-        Optional:
-        - index (default: 0)
-        - limit (default: 10)
-
-        Returns:
-        - Job Title
-        - Portal Name
-        - Job URL
-        - Job Type
-        - Status
-        - Client Name
-        - Country
-        - Hire Rate
-        - Total Amount Spent
-        - Booked By
-        - Created By
-        - Created Date
-        - Total Count
-        """
+Returns job, client, portal, status, and booking details with total count.
+"""
 
         url = "https://erp-staging.projectlabs.in/v1/bid/details"
 

@@ -9,34 +9,17 @@ def register_training_test_list(mcp):
         limit: int = 10
     ):
         """
-        This tool fetches the list of training tests.
+Fetches training test list with milestones, tasks, and subtasks.
 
-        Use this tool when user asks about:
-        - Training test list
-        - Available tests
-        - Test details
-        - Training courses
-        - Milestones inside test
-        - Test approval status
-        - Test estimated time
+Use for queries about: training tests, available tests, milestones, tasks, approval status, or estimated time.
 
-        Required:
-        - auth_token (User authentication token)
+Params:
+- auth_token (required)
+- index (optional, pagination)
+- limit (optional, pagination)
 
-        Optional:
-        - index (default: 0)
-        - limit (default: 10)
-
-        Returns:
-        - Test name
-        - Approval status
-        - Created by
-        - Total milestones
-        - Number of topics
-        - Estimated time
-        - Milestone details
-        - Task & subtask details
-        """
+Returns test details including name, approval status, creator, milestone/topic count, estimated time, and full milestone-task-subtask structure.
+"""
 
         url = f"https://erp-staging.projectlabs.in/v1/training/test?index={index}&limit={limit}"
 

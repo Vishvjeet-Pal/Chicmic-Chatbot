@@ -7,31 +7,22 @@ def register_timesheet(mcp):
     @mcp.tool()
     async def my_timesheet_search(auth_token, request_data, date="", month="")-> str:
         """
-        Use this tool ONLY when the user asks about its timesheet details such as:
-        - projects
-        - Details of all timesheets of user
-        - Upwork Status
-        - Timesheet Status
-        - Timesheet Date
-        - tasks
-        - time spent
-        - work logs
-        - employee work details
+Fetches employee timesheet details from ERP.
 
-        This tool searches timesheet/project information from the given api.
+Use ONLY for queries about: timesheets, projects, tasks, work logs, time spent, timesheet status, or Upwork status.
 
-        INSTRUCTIONS:
-            - If year is not mentioned in user's query, DO NOT ASSUME year. Just provide date without year.
+Rules:
+- Do NOT assume year if not mentioned.
+- If date provided → return that date’s record.
+- If only month provided → return full month data.
+- If neither provided → return latest/pending timesheets.
 
-        STRICT RULES:
-            - If no year is mentioned in date, Do NOT assume the year.
-
-        args:
-        - auth_token: provided in the header of request
-        - request_data
-        - date: provided by user in the query, if no date is mentioned in the query return 5 latest timesheet details. If user mentions today, yesterday, etc take the value accordingly in dd-mm-yyyy format.
-        - month: provided by user in the query. if month is mentioned but date is not, return timesheet details of complete month.
-        """
+Params:
+- auth_token (required)
+- request_data (must contain user _id)
+- date (optional)
+- month (optional)
+"""
 
         if not request_data.get('_id'):
             return "Your user id is not found"

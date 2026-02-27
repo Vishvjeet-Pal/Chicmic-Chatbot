@@ -14,53 +14,20 @@ def register_screening_request(mcp):
         status="",
         is_experienced=""
     ):
-        """  
-        This tool retrieves candidate list records from the ERP system.
-
-Use this tool when the user asks about:
-- Screening requests
-- Interview candidates
-- Hiring pipeline candidates
-- Recruitment candidates
-- Candidate details
-- Candidate status
-- Screening status
-- Recruiter-wise candidate data
-- Team-wise candidate data
-
-The tool returns the following formatted data of the candidate giving interview:
-
-- Name of the candidate who has applied for the job/interview
-- Email of the candidate
-- Contact Number of the candidate
-- Recruiter Name of the candidate
-- Applied Team
-- Designation for which the candidate has applied
-- Current Salary of candidate giving interview
-- Expected Salary of candidate giving interview
-- Total Work Experience of candidate giving interview
-- Relevant Work Experience of candidate giving interview
-- Live Status
-- Screening Status
-- Final Status
-- Experienced
-- Notice Period
-- Expected Joining Date
-- Created At
-- Updated At
-
-        args:
-        - auth_token: The authentication token for API access. Provided in the Authorization header.
-        - candidate_name: (Optional) Filter by candidate name.
-        - email: (Optional) Filter by email.
-        - recruiter_name: (Optional) Filter by recruiter name.
-        - team: (Optional) Filter by applied team name.
-        - designation: (Optional) Filter by designation.
-        - live_status: (Optional) Filter by live status.
-        - screening_status: (Optional) Filter by screening status.
-        - status: (Optional) Filter by final status.
-        - is_experienced: (Optional) Filter by experienced (true/false).
         """
+Fetches screening/interview candidate list from ERP.
+
+Use for queries about: screening requests, interview candidates, hiring pipeline, candidate status, recruiter-wise or team-wise candidates.
+
+Filters supported:
+- candidate_name, email
+- recruiter_name, team
+- designation
+- live_status, screening_status, final status
+- is_experienced (true/false)
+
+Param: auth_token (required).
+"""
 
         CANDIDATE_LIST_API_URL = "https://erp-staging.projectlabs.in/v1/interview/candidate/list"
 

@@ -9,31 +9,17 @@ def register_training_feedback_history(mcp):
         limit: int = 10
     ):
         """
-        This tool fetches Training Feedback History.
+Fetches training feedback history from ERP.
 
-        Use this tool when user asks about:
-        - Training feedback history
-        - Trainee feedback
-        - Reviewer feedback list
-        - Behavior feedback
-        - Rating history of trainees
+Use for queries about: trainee feedback, reviewer feedback, rating history, behavior feedback, or training evaluations.
 
-        Required:
-        - auth_token
+Params:
+- auth_token (required)
+- index (optional, pagination)
+- limit (optional, pagination)
 
-        Optional:
-        - index (default: 0)
-        - limit (default: 10)
-
-        Returns:
-        - Reviewer name & team
-        - Trainee name & team
-        - Feedback type
-        - Ratings (overall, attitude, team spirit)
-        - Comment
-        - Created date
-        - Overall average rating
-        """
+Returns reviewer/trainee details, ratings, comments, created date, total count, and overall average rating.
+"""
 
         url = f"https://erp-staging.projectlabs.in/v1/training/feedback?index={index}&limit={limit}"
 

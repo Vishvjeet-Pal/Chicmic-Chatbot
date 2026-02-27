@@ -10,35 +10,23 @@ def register_attendance(mcp):
         request_data,
         date="",
         status="",
-        month=datetime.today().strftime("%b")
+        month=""
     ):
         """
-            This tool provides daily timesheet and attendance details of a user.
-            Use this tool when the user asks ONLY about:
+Returns user daily attendance details.
 
-            Daily attendance
-            Attendance sheet
-            Absent or present status
-            list of days when user was absent or present
-            At what time I came to office on specified day. It DOES NOT tells the office timing of the user
-            User was absent or present on specified day/date
-            Entry and exit time of user in office on specified day. It DOES NOT tells the office timing of the user. It only tells the timing when user came to office/workzone. Office timing may be different from main gate/office in time of user.
-            Work from home status
-            Holiday status
-            How much of my Leaves deducted 
-            Timesheet status (pending or approved)
-            Upwork status
-            Main Gate in/out time of the user. It DOES NOT tell the office timing of the user.
-            Note: This tool does not provide the office timing of the user. It only tells the timing when user came to office/workzone. Office timing may be different from main gate/office in time of user. 
-            If no date is provided, it provides the attendance of all days in the current month. If date is provided, it provides the attendance details of that specific date. Date can be in format like '19 Feb' or '19-02-2026' or '19 feb 2026'.
-            Is date or status is provided, filter result on that basis
-            args:
-            - auth_token: provided in the header of request
-            - request_data: provided in the body of request
-            - date
-            - status: [present, absent]. If status is provided, it filters the attendance records based on the specified status.
-            - month: takes the value of month name provide in user's query. Do NOT take default value of month if month name is mentioned in users query. If no month is provided take current month.
-            """
+Use only for: present/absent status, entry/exit time, main gate time, leaves deducted, timesheet or upwork status.
+
+Rules:
+- No official office timing.
+- If date provided → return that date only.
+- If status provided → filter by present/absent.
+- If month provided → use that month.
+- If no date → return current month.
+- If asking for today and no record → "Details not mentioned."
+
+Params: auth_token, request_data (_id required), date, status, month.
+"""
 
         if not request_data.get("_id"):
             return "User ID not found."
@@ -63,7 +51,7 @@ def register_attendance(mcp):
     "december": '11', "dec": '11',
 }
 
-        API_URL = f"https://api.portal.chicmicstudios.in/v1/timesheet/in/out?month={MONTH_MAP.get(month.lower())}&year=2026&userId={request_data['_id']}&limit=31"
+        API_URL = f"https://api.portal.chicmicstudios.in/v1/timesheet/in/out?month={MONTH_MAP.get(month.lower(),MONTH_MAP[str(datetime.today().strftime('%b')).lower()])}&year=2026&userId={request_data['_id']}&limit=31"
 
         headers = {
             "Authorization": auth_token,
@@ -116,7 +104,7 @@ def register_attendance(mcp):
                         return "You were present on:\n" + "\n".join(present_days) + "\n"
 
                 # 🔹 If user asked for specific date
-                if date and final_date:
+                if (date and final_date) or (not date and not month):
                     for attendance in attendance_data:
                         raw_date = attendance.get("date")
                         if not raw_date:

@@ -15,28 +15,19 @@ def register_wfh_list(mcp):
         limit: int = 10
     ):
         """
-        This tool retrieves Work From Home (WFH) records.
+Fetches Work From Home (WFH) records with filtering and auto-pagination.
 
-        Use this tool when user asks about:
-        - WFH list
-        - Work from home records
-        - Employee WFH details
-        - WFH by employee name
-        - WFH by team
-        - WFH by date
-        - WFH by status (approved/pending/rejected)
+Use for queries about WFH list, employee WFH details, status (approved/pending/rejected), or date-based WFH records.
 
-        Filters:
-        - employee_name: Filter by employee full name
-        - status: Filter by status (1=Approved, 0=Pending, 2=Rejected)
-        - from_date: Filter WFH starting from this date (any format)
-        - to_date: Filter WFH ending till this date (any format)
-        - limit: Records per API call (default 10)
+Filters:
+- employee_name (optional)
+- status (optional: 0=Pending, 1=Approved, 2=Rejected)
+- from_date (optional)
+- to_date (optional)
+- limit (optional, default 10)
 
-        Pagination:
-        - Automatically fetches all pages using while loop
-        - Index increases dynamically
-        """
+Returns employee name, team, date range, total days, reason, status, and tracker type.
+"""
 
         WFH_API_URL = "https://erp-staging.projectlabs.in/v1/WFH/list"
 

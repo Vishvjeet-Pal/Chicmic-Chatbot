@@ -58,7 +58,7 @@ def register_project(mcp):
                 # f"Trackers allocated: {[trackers.get('userName') for trackers in project.get('allocatedTrackers').get('allocatedUsers')]}\n"
                 f"Client Name: {project.get('clientName')}\n"
                 f"Client Company: {project.get('clientCompany')}\n"
-                f"Default Task of the project {project.get('name')}: {[task.get('taskName') for task in project.get('defaultTask')]}\n"
+                f"Task of the project {project.get('name')}: {[task.get('taskName') for task in project.get('defaultTask')]}\n"
                 for project in project_list
                 ])
             except Exception as e:

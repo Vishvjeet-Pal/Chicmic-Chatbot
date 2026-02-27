@@ -26,7 +26,7 @@ app.add_middleware(
 )
 # llm = ChatOllama(model="gpt-oss:20b", temperature=1,base_url="http://192.180.5.31:11434", streaming=True)
 # llm = ChatOllama(model="llama3.1", temperature=0,base_url="http://192.180.5.31:11434")
-llm = ChatGroq(model="openai/gpt-oss-120b", temperature=0, api_key=settings.GROQ_API_KEY, streaming=True)
+llm = ChatGroq(model="openai/gpt-oss-20b", temperature=0, api_key=settings.GROQ_API_KEY_KASHISH, streaming=True)
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 server_path = os.path.join(current_dir, "mcp_server.py")
@@ -63,13 +63,13 @@ If the user asks ANYTHING related to holidays
 NOTE: 
 Use get_user_profile_data tool if user asks about LEAVE BALANCE or PROFILE DATA and get_user_leaves if user asks about PENDING/APPROVED LEAVES. Treat leave balance and pending leave differently. Provide complete profile data if user asks about its profile data.
 Use my_timesheet_search tool when user asks about timesheet details
-Use get_daily_attendance tool when user asks about ATTENDANCE, ABSENT/PRESENT STATUS, leave deduction
+Use attendance_others tool if user asks about employees' attendance details, entry time in office by specifying employee name, employee id, team and Use get_daily_attendence tool when user asks about it's ATTENDANCE, ABSENT/PRESENT STATUS, leave deduction of the current user itself. Do not use get_daily_attendence if employee name, employee id, team, is mentioned.
 Use get_user_leaves if user asks about its own leaves and leave_application tool if user asks about other employees leaves.
 If user asks about leave details of employees by specifying employee name, team, employee id, reporting manager, leave type, reason, date or status, use leave_application tool to get the details. If no employee name, team, employee id, reporting manager, leave type, reason, date or status is specified in user's query, then use get_user_leaves tool to get the leave details of the user itself.
 If user asks about late come requests of employees by specifying employee name, team, employee id, reporting manager then use late_arrival_requests tool. If no employee name, team, employee id, reporting manager is specified, then use my_late_come_requests tool to provide late come details of the user itsel.
-If user asks about timesheet of employees by specifying employee name, team, employee id, use timesheet_summary tool. If no employee name, team, employee id is mentioned use my_timesheet_search tool to provide timesheet details of the user itself.
-If user asks about manual hour request of employees by specifying employee name, employee id, use manual_hours_requests_other tool. If no employee name, employee id is mentioned use manual_hour_requests tool to provide manual hours requests of the user itself.
-If user asks about it assets assigned to employees by specifying employee name, employee id, use asset_list tool. If no employee name, employee id, is provided use user assets tool for providing asset details of the current user itself.
+If user asks about timesheet of employees by specifying all employees, employee name, team, employee id, use timesheet_summary tool. If no employee name, team, employee id is mentioned use my_timesheet_search tool to provide timesheet details of the user itself.
+If user asks about manual hour request of employees by specifying all employee, employee name, employee id, team use manual_hours_requests_other tool. If no employee name, employee id is mentioned use manual_hour_requests tool to provide manual hours requests of the user itself.
+If user asks about it assets assigned to employees by specifying all employee, employee name, employee id, team use asset_list tool. If no employee name, employee id, is provided use user assets tool for providing asset details of the current user itself.
 If user asks about screening request details of candidates being/applied for interview use screening_request tool.
 """
 

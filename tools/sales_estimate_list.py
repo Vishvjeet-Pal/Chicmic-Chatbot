@@ -10,37 +10,17 @@ def register_sales_estimate_list(mcp):
         limit: int = 10
     ):
         """
-        This tool fetches Sales → Estimate List.
+Fetches sales estimate list from ERP.
 
-        Use this tool when user asks about:
-        - Sales estimates
-        - Estimate list
-        - Client estimates
-        - Estimate details
-        - Estimate assigned teams
-        - Bid estimate details
+Use for queries about: sales estimates, client estimates, estimate details, assigned teams, or bid estimate status.
 
-        Required:
-        - auth_token
+Params:
+- auth_token (required)
+- index (optional, pagination)
+- limit (optional, pagination)
 
-        Optional:
-        - index (default: 0)
-        - limit (default: 10)
-
-        Returns:
-        - Client Name
-        - Needed By Date
-        - Job Title
-        - Portal
-        - Job URL
-        - Country
-        - Budget Info
-        - Teams Involved
-        - Estimate Status
-        - Created Date
-        - Last Updated
-        - Total Count
-        """
+Returns client info, job details, budget, teams, status, dates, and total count.
+"""
 
         url = "https://erp-staging.projectlabs.in/v2/estimate"
 
