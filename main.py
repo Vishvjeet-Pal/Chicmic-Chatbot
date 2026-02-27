@@ -121,7 +121,7 @@ async def startup():
 
 @app.get("/")
 def serve_index():
-    return FileResponse("index.html")
+    return FileResponse("index_v2.html")
 
 @app.post("/ask")
 async def ask_chatbot(query: str, Authorization:str=Header(...), request_data: dict=Body(None)):
@@ -186,10 +186,6 @@ async def ask_chatbot_stream(
             "Connection": "keep-alive",
         }
     )
-
-@app.get("/streaming")
-def serve_index_streaming():
-    return FileResponse("index_streaming.html")
 
 @app.get("/holidays")
 async def get_holiday_calendar():
