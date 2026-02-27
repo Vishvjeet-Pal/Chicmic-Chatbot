@@ -2,61 +2,30 @@ import httpx
 
 def register_in_out_others(mcp):
     @mcp.tool()
-    async def in_out_others(
+    async def attendance_others(
         auth_token,
+        request_data,
         month,
         year,
         user_id="",
         employee_name="",
-        employee_id="",
         team_name="",
         is_wfh="",
         is_holiday="",
         inout_deduction=""
     ):
-        """  
-        This tool retrieves in/out timesheet details of other employees from the ERP system.
-
-Use this tool when the user asks about:
-- In time and out time of other employees
-- Monthly attendance report
-- Timesheet report of other employees
-- In/Out deductions
-- WFH details
-- Holiday working details
-- Employee attendance statistics
-- Monthly in/out summary of other employees
-
-The tool returns formatted timesheet data containing:
-
-- Employee Name
-- Employee ID
-- Official Email
-- Role
-- Designation
-- Team Names
-- Min In Time
-- Max In Time
-- Working Days
-- Date
-- Is WFH
-- Is Holiday
-- Leaves Deducted
-- In/Out Deduction
-- TimeSheet Time
-
-        args:
-        - auth_token: The authentication token for API access. Provided in the Authorization header.
-        - month: Month number (e.g., 1 for January).
-        - year: Year (e.g., 2026).
-        - user_id: (Optional) Filter by user ID.
-        - employee_name: (Optional) Filter by employee name.
-        - employee_id: (Optional) Filter by employee ID.
-        - team_name: (Optional) Filter by team name.
-        - is_wfh: (Optional) Filter by WFH status (true/false).
-        - is_holiday: (Optional) Filter by holiday status (true/false).
-        - inout_deduction: (Optional) Filter by in/out deduction (true/false).
         """
+Fetches monthly in/out attendance details of employees.
+
+Use for queries about: employee in/out time, attendance report, WFH/holiday status, in/out deductions, or monthly attendance summary.
+
+Filters supported:
+- user_id, employee_name, employee_id, team_name
+- is_wfh, is_holiday, inout_deduction
+- month, year (required)
+
+Param: auth_token (required), others optional.
+"""
 
         IN_OUT_API_URL = "https://erp-staging.projectlabs.in/v1/timesheet/in/out"
 
@@ -68,7 +37,7 @@ The tool returns formatted timesheet data containing:
         params = {
             "month": month,
             "year": year,
-            "userId": user_id
+            "userId": request_data['_id']
         }
 
         async with httpx.AsyncClient() as client:
@@ -100,9 +69,6 @@ The tool returns formatted timesheet data containing:
 
                     # Employee level filtering
                     if employee_name and employee_name.lower() not in (emp.get("name") or "").lower():
-                        continue
-
-                    if employee_id and employee_id.lower() not in (emp.get("employeeId") or "").lower():
                         continue
 
                     if team_name and team_name.lower() not in (emp.get("teamNames") or "").lower():

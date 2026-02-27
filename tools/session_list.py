@@ -9,31 +9,17 @@ def register_training_session_list(mcp):
         limit: int = 10
     ):
         """
-        This tool fetches the list of training sessions.
+Fetches training session list from ERP.
 
-        Use this tool when user asks about:
-        - Training session list
-        - Training sessions
-        - Session details
-        - Upcoming or past sessions
-        - Session status
-        - Training module sessions
+Use for queries about: training sessions, session details, upcoming/past sessions, session status, or training modules.
 
-        Required:
-        - auth_token (User authentication token)
+Params:
+- auth_token (required)
+- index (optional, pagination)
+- limit (optional, pagination)
 
-        Optional:
-        - index (default: 0)
-        - limit (default: 10)
-
-        Returns:
-        - Session title
-        - Date & time
-        - Location
-        - Approval status
-        - Created date
-        - MOM (Minutes of Meeting)
-        """
+Returns session title, date/time, location, status, approval, MOM, and total count.
+"""
 
         url = f"https://erp-staging.projectlabs.in/v1/training/session?index={index}&limit={limit}"
 

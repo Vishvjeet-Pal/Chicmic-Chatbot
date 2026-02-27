@@ -16,25 +16,23 @@ def register_user_leaves(mcp):
         leave_reason="",
         date=""
     ):
-        """ 
-        This tool provides details / history of leaves taken by the user. 
-        STRICT RULES:
-        - DO NOT call this tool if user asks about attendance or present/absent status
-        - DO NOT call this tool if user asks about LEAVE DEDUCTION
-        It describes: 
-        - applied date of leave 
-        - leave duration 
-        - leave status 
-        - leave reason 
-        - leave send to 
-        - total leaves taken DO NOT use this tool if user asks about LEAVE BALANCE 
-        args: 
-        - auth_token: provided in header of request 
-        - leave_type: [casual leave, sick leave]. DO NOT take any other value for this argument. 
-        - leave_reason: [Exams, Urgent work, emergency, marriage, other]. DO NOT take any other value for this argument. 
-        - date
-        - request_data: request body 
         """
+Fetches user's leave history with optional filtering.
+
+STRICT:
+- Do NOT use for attendance, present/absent, leave balance, or leave deduction queries.
+
+Use for queries about leave history, leave status, applied leaves, leave reason, or leave duration.
+
+Params:
+- auth_token (required)
+- request_data (must contain user _id)
+- leave_type (optional: Casual Leave, Sick Leave)
+- leave_reason (optional: Exams, Urgent work, emergency, marriage, other)
+- date (optional)
+
+Returns leave date range, status, duration, reason, reporting manager, and leave type details.
+"""
         if not request_data.get('_id'):
             return "Your user id is not found"
 

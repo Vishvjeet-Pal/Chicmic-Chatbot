@@ -13,39 +13,19 @@ def register_resignations(mcp):
         is_early_release=""
     ):
         """
-        This tool retrieves the resignation list from the ERP system.
+Fetches employee resignation records from ERP.
 
-Use this tool when the user asks about:
-- Resignation list
-- Employees who resigned
-- Early release resignations
-- Last working day details
-- Exit records
-- Resignation status
-- HR resignation report
+Use for queries about: resignation list, exit records, early release cases, last working day, or resignation status.
 
-The tool returns formatted resignation data containing:
+Filters supported:
+- employee_name
+- team_name
+- status
+- is_early_release (true/false)
+- index, limit, listing_type (pagination/control)
 
-- Employee Name
-- Team Name(s)
-- Status
-- Early Release Flag
-- Early Release Date (if applicable)
-- Last Working Day
-- Reason for Resignation
-- Created At
-- Actioned By
-
-        args:
-        - auth_token: Authentication token for API access.
-        - index: Pagination index (default 0).
-        - limit: Pagination limit (default 10).
-        - listing_type: Listing type filter (default 2).
-        - employee_name: (Optional) Filter by employee name.
-        - team_name: (Optional) Filter by team name.
-        - status: (Optional) Filter by resignation status.
-        - is_early_release: (Optional) Filter by early release (true/false).
-        """
+Param: auth_token (required).
+"""
 
         RESIGNATION_API_URL = "https://erp-staging.projectlabs.in/v1/resignation/list"
 

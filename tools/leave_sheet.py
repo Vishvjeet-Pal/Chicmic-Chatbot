@@ -16,45 +16,19 @@ def register_leave_sheet(mcp):
         is_waiver=""
     ):
         """
-        This tool retrieves the leave calendar sheet of employees from the ERP system.
+Fetches monthly employee leave sheet (calendar view).
 
-Use this tool when the user asks about:
-- Leave sheet
-- Leave calendar
-- Monthly leave report
-- Employee leave summary
-- Unpaid leaves
-- Leave balance
-- Leave taken report
-- Leave status by date
+Use for queries about: leave calendar, monthly leave report, leave balance, unpaid leaves, or leave status by date.
 
-The tool returns formatted leave data containing:
+Filters supported:
+- employee_name, employee_id
+- status (daily leave code)
+- unpaid (true/false)
+- is_waiver (true/false)
+- month, year (required)
 
-- Employee Name
-- Employee ID
-- Joining Date
-- Leave Status (per day)
-- Unpaid Flag
-- Date
-- Leaves Taken
-- Leave Balance
-- Unpaid Leaves
-- Total Working Days
-- Is Waiver
-
-        args:
-        - auth_token: Authentication token for API access.
-        - month: Month number (e.g., 1 for January).
-        - year: Year (e.g., 2026).
-        - index: Pagination index (default 0).
-        - limit: Pagination limit (default 10).
-        - working_at: Working location filter (default 1).
-        - employee_name: (Optional) Filter by employee name.
-        - employee_id: (Optional) Filter by employee ID.
-        - status: (Optional) Filter by daily leave status (e.g., S, CL, EL, etc.).
-        - unpaid: (Optional) Filter by unpaid leave (true/false).
-        - is_waiver: (Optional) Filter by waiver flag (true/false).
-        """
+Param: auth_token (required), others optional.
+"""
 
         LEAVE_SHEET_API_URL = "https://erp-staging.projectlabs.in/v1/leave/calender"
 

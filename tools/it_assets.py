@@ -3,48 +3,18 @@ import httpx
 def register_asset_list(mcp):
     @mcp.tool()
     async def asset_list(auth_token, asset_name="", brand="", employee_name="", request_status="", asset_status=""):
-        """  
-        This tool retrieves asset list records from the ERP system.
-
-Use this tool when the user asks about:
-- Asset inventory list
-- Assigned assets
-- Assets assigned to specific employee
-- Asset request details
-- Laptop or hardware allocation
-- Asset details by brand or name
-- Requested asset approvals
-- Organization asset records
-
-The tool returns formatted asset data containing:
-
-- Asset Name
-- Brand
-- Serial Number
-- RAM
-- Storage
-- MAC Address
-- Screen Size
-- Graphics
-- Adaptor
-- IMEI1
-- IMEI2
-- Model Number
-- Asset Status
-- Assigned To
-- Assigned Employee ID
-- Requested By
-- Request Status
-- Created At
-
-args:
-- auth_token: The authentication token for API access. Provided in the Authorization header.
-- asset_name: (Optional) Filter by asset name.
-- brand: (Optional) Filter by brand name.
-- employee_name: (Optional) Filter by assigned employee name.
-- request_status: (Optional) Filter by request status (pending, approved, rejected).
-- asset_status: (Optional) Filter by asset status (active, assigned, inactive, retired).
         """
+Fetches organization asset list.
+
+Use for queries about: asset inventory, assigned assets, laptop/hardware allocation, asset requests, or assets by brand/employee/status.
+
+Filters supported:
+- asset_name, brand, employee_name
+- request_status (Pending/Approved/Rejected)
+- asset_status (Active/Assigned/Inactive/Retired)
+
+Param: auth_token (required), others optional.
+"""
 
         ASSET_LIST_API_URL = "https://erp-staging.projectlabs.in/v1/asset/list"
 

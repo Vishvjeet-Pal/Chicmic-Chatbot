@@ -3,34 +3,17 @@ import httpx
 def register_recruitment_report(mcp):
     @mcp.tool()
     async def recruitment_report(auth_token, month="", recruiter_name=""):
-        """  
-        This tool retrieves recruitment report records from the ERP system.
-
-Use this tool when the user asks about:
-- Recruitment report
-- Monthly hiring report
-- Recruiter performance report
-- Interview selection report
-- Candidate screening statistics
-- Hiring statistics by recruiter
-- Monthly recruitment summary
-
-The tool returns formatted recruitment report data containing:
-
-- Month Name
-- Recruiter Name
-- Total Candidates
-- Offer Sent
-- Selected Candidates
-- Rejected In Screening
-- Selected In Interview
-- Not Responding Candidates
-
-args:
-- auth_token: The authentication token for API access. Provided in the Authorization header.
-- month: (Optional) Filter by month name.
-- recruiter_name: (Optional) Filter by recruiter name.
         """
+Fetches recruitment report data from ERP.
+
+Use for queries about: monthly hiring report, recruiter performance, candidate statistics, interview results, or recruitment summary.
+
+Filters supported:
+- month
+- recruiter_name
+
+Param: auth_token (required).
+"""
 
         RECRUITMENT_REPORT_API_URL = "https://erp-staging.projectlabs.in/v1/interview/recuritment/report"
 

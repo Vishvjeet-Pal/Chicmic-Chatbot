@@ -3,46 +3,19 @@ import httpx
 def register_user_assets(mcp):
     @mcp.tool()
     async def user_assets(auth_token, asset_name="", brand="", asset_status="", verified=""):
-        """  
-        This tool retrieves user asset records from the ERP system.
-
-Use this tool when the user asks about:
-- User assets
-- Company assets
-- Asset list
-- Assigned assets
-- Hardware inventory
-- Devices assigned to users
-- Asset details by name or brand
-- Verified or unverified assets
-
-The tool returns formatted asset data containing:
-
-- Asset Name
-- Brand
-- Serial Number
-- Processor
-- RAM
-- Storage
-- Operating System
-- Graphics
-- Screen Size
-- Adaptor
-- IMEI1
-- IMEI2
-- MAC Address
-- Verified Status
-- Asset Status
-- Created At
-- Updated At
-
-        args:
-        - auth_token: The authentication token for API access. Provided in the Authorization header.
-        - asset_name: (Optional) Filter by asset name.
-        - brand: (Optional) Filter by brand name.
-        - asset_status: (Optional) Filter by asset status (active, inactive, assigned, unassigned).
-        - verified: (Optional) Filter by verification status (true/false).
         """
+Fetches user/company asset records from ERP.
+
+Use for queries about: asset list, assigned devices, hardware inventory, asset details, verified/unverified assets.
+
+Filters supported:
+- asset_name
+- brand
+- asset_status (Active, Assigned, Inactive, Retired)
+- verified (true/false)
+
+Param: auth_token (required), others optional.
+"""
 
         ASSET_API_URL = "https://erp-staging.projectlabs.in/v1/user/assets"
 

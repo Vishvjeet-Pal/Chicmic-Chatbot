@@ -3,40 +3,21 @@ import httpx
 def register_award_list(mcp):
     @mcp.tool()
     async def award_list(auth_token, award_name="", award_type="", award_status="", year="", is_eligible="", can_see_nomination=""):
-        """  
-        This tool retrieves award list records from the ERP system.
-
-Use this tool when the user asks about:
-- Quarterly awards
-- Award list
-- Nomination eligibility
-- Upcoming awards
-- Award due dates
-- Award status details
-- Awards for a specific year
-- Award nomination visibility
-
-The tool returns formatted award data containing:
-
-- Award Name
-- Award Type
-- Due Date
-- Last Due Date
-- Can See Nomination
-- Eligible For Nomination
-- Award Status
-- Award ID
-- User ID
-
-        args:
-        - auth_token: The authentication token for API access. Provided in the Authorization header.
-        - award_name: (Optional) Filter by award name.
-        - award_type: (Optional) Filter by award type (e.g., quarterly).
-        - award_status: (Optional) Filter by award status (active, completed, upcoming, closed).
-        - year: (Optional) Filter awards by year.
-        - is_eligible: (Optional) Filter by eligibility for nomination (true/false).
-        - can_see_nomination: (Optional) Filter by nomination visibility (true/false).
         """
+Fetches award list records.
+
+Use for queries about: award list, quarterly/monthly/annual awards, award status (active/upcoming/completed/closed), nomination eligibility, nomination visibility, or awards by year.
+
+Filters supported:
+- award_name
+- award_type (Quarterly/Monthly/Annual)
+- award_status (Active/Upcoming/Completed/Closed)
+- year
+- is_eligible (true/false)
+- can_see_nomination (true/false)
+
+Params: auth_token (required), other filters optional.
+"""
 
         AWARD_LIST_API_URL = "https://erp-staging.projectlabs.in/v1/awards/list"
 
